@@ -234,3 +234,12 @@
   - Active group sees their 2-minute timer.
   - Waiting groups (not their turn) see the Stock Chart along with a "Please wait for your turn" message.
 - Applied premium glassmorphism styling to the chart card with backdrop blur and subtle pulsing animations.
+
+## Commit: Complete Show Manager workflow with Next/End controls
+- Implemented `POST /api/show/next` and `POST /api/show/end` backend endpoints to manage live show progression.
+- Updated the Admin Panel with a state-aware Show Manager tab:
+  - If no show is active: Displays class selectors and the large "START" button.
+  - If a show is active: Displays a live status board showing the active class and current performing group.
+  - Added "NEXT GROUP ➡️" button for admins to advance the queue.
+  - Added "END SHOW ⏹️" button to reset the show state to idle.
+- Synchronized show state across the Admin and Main dashboards via 3-second polling intervals.

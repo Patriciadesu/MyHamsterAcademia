@@ -377,6 +377,38 @@ app.post('/api/show/trigger-timer', async (req, res) => {
   }
 });
 
+// Move to next group (Admin only)
+app.post('/api/show/next', requireAdmin, async (req, res) => {
+  try {
+    const state = await ShowState.findOne({});
+    if (!state) return res.status(400).json({ error: 'No active show' });
+
+    const classQueue = await ClassQueue.findOne({ class: state.activeClass });
+    if (state.currentGroupIndex + 1 >= classQueue.queue.length) {
+      return res.status(400).json({ error: 'No more groups in queue' });
+    }
+
+    state.currentGroupIndex += 1;
+    state.status = 'waiting_for_group';
+    state.timerStartedAt = null;
+    await state.save();
+
+    res.json({ success: true, state });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to move to next group' });
+  }
+});
+
+// End show (Admin only)
+app.post('/api/show/end', requireAdmin, async (req, res) => {
+  try {
+    await ShowState.deleteMany({});
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to end show' });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Backend server running on port ${PORT}`);
 });

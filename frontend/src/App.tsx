@@ -393,6 +393,19 @@ function Admin() {
   const [randomizing, setRandomizing] = useState(false);
   const [selectedClass, setSelectedClass] = useState<string>('');
   const [showManagerClass, setShowManagerClass] = useState<string>('');
+  const [showStatus, setShowStatus] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchStatus = () => {
+      fetch('https://api.questcity.cloud/myhamsteracademia/api/show/status')
+        .then(res => res.json())
+        .then(data => setShowStatus(data))
+        .catch(() => {});
+    };
+    fetchStatus();
+    const interval = setInterval(fetchStatus, 3000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     const token = localStorage.getItem('auth_token');
@@ -833,72 +846,132 @@ function Admin() {
 
         {activeTab === 'ShowManager' && (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '36px', minHeight: '400px', paddingTop: '40px' }}>
-            {/* Class selector */}
-            <div style={{ display: 'flex', gap: '12px' }}>
-              {(['Staff', 'Starway', 'NSC'] as const).map(cls => (
+            {(!showStatus || showStatus.status === 'idle') ? (
+              <>
+                {/* Class selector */}
+                <div style={{ display: 'flex', gap: '12px' }}>
+                  {(['Staff', 'Starway', 'NSC'] as const).map(cls => (
+                    <button
+                      key={cls}
+                      onClick={() => setShowManagerClass(cls)}
+                      style={{
+                        padding: '10px 28px', borderRadius: '10px', border: '2px solid',
+                        borderColor: showManagerClass === cls ? '#57c4a0' : '#444651',
+                        backgroundColor: showManagerClass === cls ? 'rgba(87, 196, 160, 0.15)' : '#1d2025',
+                        color: showManagerClass === cls ? '#57c4a0' : '#8f909c',
+                        fontSize: '15px', fontWeight: 700, cursor: 'pointer', transition: 'all 0.15s'
+                      }}
+                    >
+                      {cls}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Big green button */}
                 <button
-                  key={cls}
-                  onClick={() => setShowManagerClass(cls)}
+                  onClick={async () => {
+                    if (!showManagerClass) return;
+                    try {
+                      const token = localStorage.getItem('auth_token');
+                      const res = await fetch('https://api.questcity.cloud/myhamsteracademia/api/show/start', {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ class: showManagerClass })
+                      });
+                      const data = await res.json();
+                      if (data.success) {
+                        // success
+                      } else {
+                        alert(data.error || 'Failed to start show');
+                      }
+                    } catch (err) {
+                      console.error(err);
+                    }
+                  }}
+                  disabled={!showManagerClass}
                   style={{
-                    padding: '10px 28px', borderRadius: '10px', border: '2px solid',
-                    borderColor: showManagerClass === cls ? '#57c4a0' : '#444651',
-                    backgroundColor: showManagerClass === cls ? 'rgba(87, 196, 160, 0.15)' : '#1d2025',
-                    color: showManagerClass === cls ? '#57c4a0' : '#8f909c',
-                    fontSize: '15px', fontWeight: 700, cursor: 'pointer', transition: 'all 0.15s'
+                    width: '200px', height: '200px', borderRadius: '50%',
+                    background: (!showManagerClass)
+                      ? 'radial-gradient(circle at 40% 35%, #555, #333)'
+                      : 'radial-gradient(circle at 40% 35%, #57c4a0, #2d6b57)',
+                    border: '6px solid rgba(87, 196, 160, 0.3)',
+                    boxShadow: !showManagerClass
+                      ? 'none'
+                      : '0 0 60px rgba(87, 196, 160, 0.5), 0 20px 40px rgba(0,0,0,0.5), inset 0 -8px 0 rgba(0,0,0,0.4)',
+                    cursor: !showManagerClass ? 'not-allowed' : 'pointer',
+                    fontSize: '24px', fontWeight: 900, color: '#fff',
+                    letterSpacing: '2px', textTransform: 'uppercase',
+                    transition: 'all 0.15s',
+                    opacity: !showManagerClass ? 0.4 : 1,
                   }}
                 >
-                  {cls}
+                  START
                 </button>
-              ))}
-            </div>
 
-            {/* Big green button */}
-            <button
-              onClick={async () => {
-                if (!showManagerClass) return;
-                try {
-                  const token = localStorage.getItem('auth_token');
-                  const res = await fetch('https://api.questcity.cloud/myhamsteracademia/api/show/start', {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ class: showManagerClass })
-                  });
-                  const data = await res.json();
-                  if (data.success) {
-                    alert(`Show started for ${showManagerClass}`);
-                  } else {
-                    alert(data.error || 'Failed to start show');
-                  }
-                } catch (err) {
-                  console.error(err);
-                }
-              }}
-              disabled={!showManagerClass}
-              style={{
-                width: '200px', height: '200px', borderRadius: '50%',
-                background: (!showManagerClass)
-                  ? 'radial-gradient(circle at 40% 35%, #555, #333)'
-                  : 'radial-gradient(circle at 40% 35%, #57c4a0, #2d6b57)',
-                border: '6px solid rgba(87, 196, 160, 0.3)',
-                boxShadow: !showManagerClass
-                  ? 'none'
-                  : '0 0 60px rgba(87, 196, 160, 0.5), 0 20px 40px rgba(0,0,0,0.5), inset 0 -8px 0 rgba(0,0,0,0.4)',
-                cursor: !showManagerClass ? 'not-allowed' : 'pointer',
-                fontSize: '24px', fontWeight: 900, color: '#fff',
-                letterSpacing: '2px', textTransform: 'uppercase',
-                transition: 'all 0.15s',
-                opacity: !showManagerClass ? 0.4 : 1,
-              }}
-            >
-              START
-            </button>
+                {!showManagerClass && (
+                  <p style={{ margin: 0, color: '#8f909c', fontSize: '14px' }}>Select a class above first</p>
+                )}
+                
+                {showManagerClass && (
+                  <p style={{ margin: 0, color: '#57c4a0', fontSize: '14px', fontWeight: 600 }}>Ready to start {showManagerClass} show</p>
+                )}
+              </>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '32px', width: '100%' }}>
+                <div style={{ textAlign: 'center' }}>
+                  <span style={{ fontSize: '12px', fontWeight: 800, color: '#faa61a', textTransform: 'uppercase', letterSpacing: '2px' }}>Live Session Active</span>
+                  <h2 style={{ fontSize: '32px', fontWeight: 900, color: '#e0e2ea', margin: '8px 0' }}>Class: {showStatus.activeClass}</h2>
+                  <div style={{ backgroundColor: 'rgba(118, 141, 222, 0.1)', padding: '16px 32px', borderRadius: '16px', border: '1px solid rgba(118, 141, 222, 0.2)', marginTop: '16px' }}>
+                    <span style={{ fontSize: '14px', color: '#8f909c' }}>CURRENTLY PERFORMING</span>
+                    <div style={{ fontSize: '24px', fontWeight: 900, color: '#768dde' }}>Group {showStatus.currentGroupName}</div>
+                  </div>
+                </div>
 
-            {!showManagerClass && (
-              <p style={{ margin: 0, color: '#8f909c', fontSize: '14px' }}>Select a class above first</p>
-            )}
-            
-            {showManagerClass && (
-              <p style={{ margin: 0, color: '#57c4a0', fontSize: '14px', fontWeight: 600 }}>Ready to start {showManagerClass} show</p>
+                <div style={{ display: 'flex', gap: '16px', marginTop: '24px' }}>
+                  <button
+                    onClick={async () => {
+                      const token = localStorage.getItem('auth_token');
+                      const res = await fetch('https://api.questcity.cloud/myhamsteracademia/api/show/next', {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                      });
+                      if (!res.ok) {
+                        const d = await res.json();
+                        alert(d.error || 'Failed to move to next group');
+                      }
+                    }}
+                    style={{
+                      padding: '16px 32px', borderRadius: '12px', backgroundColor: '#5865f2', color: '#fff',
+                      border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: '16px',
+                      boxShadow: '0 4px 15px rgba(88, 101, 242, 0.3)', transition: 'all 0.2s'
+                    }}
+                    onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+                    onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+                  >
+                    NEXT GROUP ➡️
+                  </button>
+
+                  <button
+                    onClick={async () => {
+                      if (!confirm('End the entire show?')) return;
+                      const token = localStorage.getItem('auth_token');
+                      await fetch('https://api.questcity.cloud/myhamsteracademia/api/show/end', {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                      });
+                    }}
+                    style={{
+                      padding: '16px 32px', borderRadius: '12px', backgroundColor: 'rgba(237, 66, 69, 0.1)', color: '#ed4245',
+                      border: '1px solid rgba(237, 66, 69, 0.3)', cursor: 'pointer', fontWeight: 700, fontSize: '16px',
+                      transition: 'all 0.2s'
+                    }}
+                    onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'rgba(237, 66, 69, 0.2)'}
+                    onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'rgba(237, 66, 69, 0.1)'}
+                  >
+                    END SHOW ⏹️
+                  </button>
+                </div>
+              </div>
             )}
           </div>
         )}
