@@ -333,13 +333,13 @@ function Admin() {
 
       const renderGroupFoldout = (groupName: string, groupUsers: any[]) => {
         const groupKey = `${className}-${groupName}`;
-        const isGroupOpen = openGroupSections[groupKey] !== false; // default true
+        const isGroupOpen = openGroupSections[groupKey] === true; // default closed
 
         return (
           <div 
             key={groupKey}
             onDragOver={handleDragOver}
-            onDrop={(e) => handleDrop(e, groupName)}
+            onDrop={(e) => { e.stopPropagation(); handleDrop(e, groupName); }}
             style={{ backgroundColor: '#1d2025', borderRadius: '8px', border: '1px dashed #444651', overflow: 'hidden' }}
           >
             <button 
@@ -380,18 +380,23 @@ function Admin() {
 
     return (
       <div style={{ backgroundColor: '#191c21', borderRadius: '12px', overflow: 'hidden', border: '1px solid #272a30' }}>
-        <button 
-          onClick={() => toggleSection(className)}
+        {/* Class Drop Zone — sits on top, always visible */}
+        <div
           onDragOver={handleDragOver}
           onDrop={(e) => handleDropClass(e, className)}
-          style={{ width: '100%', padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#1d2025', border: 'none', cursor: 'pointer', outline: 'none' }}
+          style={{ display: 'flex', alignItems: 'center', backgroundColor: '#1d2025' }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <h2 style={{ fontSize: '20px', fontWeight: 700, margin: 0, color: '#e0e2ea' }}>{className}</h2>
-            <span style={{ fontSize: '12px', fontWeight: 600, color: '#b6c4ff', backgroundColor: 'rgba(118, 141, 222, 0.2)', padding: '4px 8px', borderRadius: '4px' }}>{usersInClass.length} Users</span>
-          </div>
-          <span style={{ transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', fontSize: '16px', color: '#c5c5d3' }}>▼</span>
-        </button>
+          <button 
+            onClick={() => toggleSection(className)}
+            style={{ flex: 1, padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'transparent', border: 'none', cursor: 'pointer', outline: 'none' }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <h2 style={{ fontSize: '20px', fontWeight: 700, margin: 0, color: '#e0e2ea' }}>{className === 'Unassigned' ? '⚠ Unassigned' : className}</h2>
+              <span style={{ fontSize: '12px', fontWeight: 600, color: '#b6c4ff', backgroundColor: 'rgba(118, 141, 222, 0.2)', padding: '4px 8px', borderRadius: '4px' }}>{usersInClass.length} Users</span>
+            </div>
+            <span style={{ transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', fontSize: '16px', color: '#c5c5d3' }}>▼</span>
+          </button>
+        </div>
 
         {isOpen && (
           <div style={{ padding: '20px', backgroundColor: '#191c21' }}>
