@@ -155,7 +155,9 @@ app.get('/api/auth/me', async (req, res) => {
       discriminator: user.discriminator,
       avatar: user.avatar,
       email: user.email,
-      role: user.role
+      role: user.role,
+      class: user.class,
+      group: user.group
     });
   } catch (err) {
     res.status(401).json({ error: 'Invalid token' });

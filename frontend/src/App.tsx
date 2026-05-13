@@ -261,6 +261,34 @@ function Main() {
         </button>
       )}
 
+      {/* Bottom-right: Logout Button */}
+      <button
+        onClick={() => {
+          localStorage.removeItem('auth_token');
+          navigate('/');
+        }}
+        style={{
+          position: 'absolute', bottom: '24px', right: '24px',
+          display: 'flex', alignItems: 'center', gap: '10px',
+          padding: '12px 24px', borderRadius: '12px',
+          backgroundColor: 'rgba(237, 66, 69, 0.15)', color: '#ed4245',
+          border: '1px solid rgba(237, 66, 69, 0.3)', cursor: 'pointer', fontWeight: 700, fontSize: '14px',
+          transition: 'all 0.2s',
+          zIndex: 10
+        }}
+        onMouseOver={(e) => {
+          e.currentTarget.style.backgroundColor = 'rgba(237, 66, 69, 0.25)';
+          e.currentTarget.style.transform = 'translateY(-2px)';
+        }}
+        onMouseOut={(e) => {
+          e.currentTarget.style.backgroundColor = 'rgba(237, 66, 69, 0.15)';
+          e.currentTarget.style.transform = 'translateY(0)';
+        }}
+      >
+        <span style={{ fontSize: '18px' }}>🚪</span>
+        LOGOUT
+      </button>
+
     </div>
   );
 }

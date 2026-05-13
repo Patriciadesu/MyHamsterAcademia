@@ -211,3 +211,9 @@
 - Added an "ADMIN PANEL" button to the bottom-left of the Main page for users with the 'admin' role.
 - Styled the button with an orange accent color and a settings emoji (⚙️) to distinguish it from other UI elements.
 - Uses absolute positioning to keep it anchored in the corner of the premium dashboard.
+
+## Commit: Add Logout button and fix user role/class data fetching
+- Added a "LOGOUT" button to the bottom-right of the Main page.
+- Updated backend /api/auth/me endpoint to include 'class' and 'group' fields, ensuring banners and queue logic work correctly.
+- Verified and fixed Admin Panel button visibility for users with the 'admin' role.
+- Styled Logout button with a subtle red outline and transparent background for a clean, premium look.
