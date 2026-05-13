@@ -351,7 +351,7 @@ app.post('/api/show/trigger-timer', async (req, res) => {
     if (!authHeader) return res.status(401).json({ error: 'Unauthorized' });
     const token = authHeader.split(' ')[1];
     const decoded = jwt.verify(token, JWT_SECRET);
-    const user = await User.findById(decoded.id);
+    const user = await User.findOne({ discordId: decoded.id });
     if (!user) return res.status(401).json({ error: 'User not found' });
 
     const state = await ShowState.findOne({});
@@ -374,6 +374,24 @@ app.post('/api/show/trigger-timer', async (req, res) => {
     res.json({ success: true, state });
   } catch (err) {
     res.status(500).json({ error: 'Failed to trigger timer' });
+  }
+});
+
+// Force trigger timer (Admin only - for testing)
+app.post('/api/show/force-trigger-timer', requireAdmin, async (req, res) => {
+  try {
+    const state = await ShowState.findOne({});
+    if (!state || state.status !== 'waiting_for_group') {
+      return res.status(400).json({ error: 'Not waiting for group to start' });
+    }
+
+    state.status = 'timer_running';
+    state.timerStartedAt = Date.now();
+    await state.save();
+
+    res.json({ success: true, state });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to force trigger timer' });
   }
 });
 

@@ -256,3 +256,18 @@
 - Simplified the `useEffect` timer logic to use direct numeric subtraction.
 - Added a temporary debug footer at the bottom of the Main dashboard to display the current state of `showStatus` and `user.group` for troubleshooting.
 - Simplified conditional rendering to ensure that if a show is active, either the timer or the stock chart is always displayed.
+
+## Commit: Fix 2-minute timer not triggering due to CastError
+- Fixed `User.findById(decoded.id)` in `/api/show/trigger-timer` endpoint replacing it with `User.findOne({ discordId: decoded.id })`.
+- This resolves an issue where the POST request failed with a 500 error due to MongoDB rejecting the Discord ID string as an ObjectId, which previously caused the timer not to show when the START SHOW button was clicked.
+- Added real-time timer countdown to the Admin Panel's Show Manager tab so admins can monitor the group's progress.
+- Implemented `POST /api/show/force-trigger-timer` and a "FORCE START ⚡" button in the Admin Panel for testing purposes, allowing admins to bypass group membership checks.
+- Restarted backend with pm2 to apply changes.
+
+## Commit: Redesign Stock Chart with bearish pattern starting from $500
+- Rewrote StockChart component to start at $500 and trend downward over time.
+- Price decreases with a 70-75% chance of dropping 2-8 points per tick, with occasional small bounces for realism.
+- Renamed label from "Market Activity" to "Hamster Index".
+- Price display and percentage now update dynamically based on the latest data point.
+- Changed theme from green (bullish) to red (bearish) — line, gradient, LIVE badge, and percentage all use #ed4245.
+- Built frontend and deployed to production.

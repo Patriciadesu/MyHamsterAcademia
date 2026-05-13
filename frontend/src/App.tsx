@@ -157,20 +157,43 @@ function Main() {
   };
 
   const StockChart = () => {
-    const [chartData, setChartData] = useState([40, 45, 42, 50, 48, 55, 52, 60, 58, 65, 62, 70, 68, 75, 72, 80]);
-    
+    // Start from 500, generate initial decreasing data with some bounces
+    const [priceData, setPriceData] = useState(() => {
+      const data = [500];
+      for (let i = 1; i < 16; i++) {
+        const prev = data[i - 1];
+        // Bias downward: drop 2-8, occasionally bounce up 1-3
+        const change = Math.random() < 0.75
+          ? -(Math.random() * 6 + 2)   // 75% chance: drop 2–8
+          : (Math.random() * 3 + 1);    // 25% chance: bounce 1–3
+        data.push(Math.max(10, parseFloat((prev + change).toFixed(2))));
+      }
+      return data;
+    });
+
     useEffect(() => {
       const interval = setInterval(() => {
-        setChartData(prev => {
+        setPriceData(prev => {
           const last = prev[prev.length - 1];
-          const next = Math.max(20, Math.min(80, last + (Math.random() * 12 - 6)));
+          // Continued downward bias with occasional small bounces
+          const change = Math.random() < 0.7
+            ? -(Math.random() * 8 + 1.5)  // drop
+            : (Math.random() * 4 + 0.5);   // bounce
+          const next = Math.max(5, parseFloat((last + change).toFixed(2)));
           return [...prev.slice(1), next];
         });
-      }, 2000);
+      }, 1800);
       return () => clearInterval(interval);
     }, []);
 
-    const points = chartData.map((d, i) => `${i * 24},${100 - d}`).join(' ');
+    const currentPrice = priceData[priceData.length - 1];
+    const pctChange = (((currentPrice - 500) / 500) * 100).toFixed(2);
+
+    // Map price data to SVG Y coords (higher price = lower Y)
+    const maxP = Math.max(...priceData);
+    const minP = Math.min(...priceData);
+    const range = maxP - minP || 1;
+    const points = priceData.map((d, i) => `${i * 24},${90 - ((d - minP) / range) * 80}`).join(' ');
 
     return (
       <div style={{ 
@@ -181,22 +204,22 @@ function Main() {
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            <span style={{ fontSize: '12px', color: '#8f909c', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>Market Activity</span>
+            <span style={{ fontSize: '12px', color: '#8f909c', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>Hamster Index</span>
             <span style={{ fontSize: '28px', fontWeight: 900, color: '#e0e2ea', display: 'flex', alignItems: 'baseline', gap: '8px' }}>
-              $4,284.60
-              <span style={{ fontSize: '14px', color: '#57c4a0', fontWeight: 700 }}>+5.24%</span>
+              ${currentPrice.toFixed(2)}
+              <span style={{ fontSize: '14px', color: '#ed4245', fontWeight: 700 }}>{pctChange}%</span>
             </span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: 'rgba(87, 196, 160, 0.1)', padding: '6px 12px', borderRadius: '8px' }}>
-            <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#57c4a0', animation: 'pulse 1.5s infinite' }} />
-            <span style={{ color: '#57c4a0', fontSize: '11px', fontWeight: 800 }}>LIVE</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: 'rgba(237, 66, 69, 0.1)', padding: '6px 12px', borderRadius: '8px' }}>
+            <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#ed4245', animation: 'pulse 1.5s infinite' }} />
+            <span style={{ color: '#ed4245', fontSize: '11px', fontWeight: 800 }}>LIVE</span>
           </div>
         </div>
         <svg viewBox="0 0 360 100" style={{ width: '100%', height: '140px', overflow: 'visible' }}>
           <defs>
             <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#57c4a0" stopOpacity="0.4" />
-              <stop offset="100%" stopColor="#57c4a0" stopOpacity="0" />
+              <stop offset="0%" stopColor="#ed4245" stopOpacity="0.35" />
+              <stop offset="100%" stopColor="#ed4245" stopOpacity="0" />
             </linearGradient>
           </defs>
           <polyline
@@ -207,12 +230,12 @@ function Main() {
           />
           <polyline
             fill="none"
-            stroke="#57c4a0"
+            stroke="#ed4245"
             strokeWidth="3"
             strokeLinecap="round"
             strokeLinejoin="round"
             points={points}
-            style={{ filter: 'drop-shadow(0 0 12px rgba(87, 196, 160, 0.6))', transition: 'all 0.5s ease' }}
+            style={{ filter: 'drop-shadow(0 0 12px rgba(237, 66, 69, 0.6))', transition: 'all 0.5s ease' }}
           />
         </svg>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '16px' }}>
@@ -418,6 +441,28 @@ function Admin() {
   const [selectedClass, setSelectedClass] = useState<string>('');
   const [showManagerClass, setShowManagerClass] = useState<string>('');
   const [showStatus, setShowStatus] = useState<any>(null);
+  const [timeLeft, setTimeLeft] = useState<number | null>(null);
+
+  // Timer logic for Admin
+  useEffect(() => {
+    let interval: any;
+    if (showStatus?.status === 'timer_running' && showStatus.timerStartedAt) {
+      const start = Number(showStatus.timerStartedAt);
+      const duration = (showStatus.timerDuration || 120) * 1000;
+      
+      const tick = () => {
+        const now = Date.now();
+        const diff = Math.max(0, Math.floor((start + duration - now) / 1000));
+        setTimeLeft(diff);
+      };
+      
+      tick();
+      interval = setInterval(tick, 1000);
+    } else {
+      setTimeLeft(null);
+    }
+    return () => { if (interval) clearInterval(interval); };
+  }, [showStatus]);
 
   useEffect(() => {
     const fetchStatus = () => {
@@ -945,10 +990,44 @@ function Admin() {
                 <div style={{ textAlign: 'center' }}>
                   <span style={{ fontSize: '12px', fontWeight: 800, color: '#faa61a', textTransform: 'uppercase', letterSpacing: '2px' }}>Live Session Active</span>
                   <h2 style={{ fontSize: '32px', fontWeight: 900, color: '#e0e2ea', margin: '8px 0' }}>Class: {showStatus.activeClass}</h2>
+                  
+                  {timeLeft !== null && (
+                    <div style={{ 
+                      fontSize: '64px', fontWeight: 900, 
+                      color: timeLeft < 30 ? '#ed4245' : '#57c4a0', 
+                      fontFamily: 'monospace', margin: '20px 0',
+                      textShadow: timeLeft < 30 ? '0 0 20px rgba(237, 66, 69, 0.4)' : '0 0 20px rgba(87, 196, 160, 0.4)'
+                    }}>
+                      {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
+                    </div>
+                  )}
+
                   <div style={{ backgroundColor: 'rgba(118, 141, 222, 0.1)', padding: '16px 32px', borderRadius: '16px', border: '1px solid rgba(118, 141, 222, 0.2)', marginTop: '16px' }}>
                     <span style={{ fontSize: '14px', color: '#8f909c' }}>CURRENTLY PERFORMING</span>
                     <div style={{ fontSize: '24px', fontWeight: 900, color: '#768dde' }}>Group {showStatus.currentGroupName}</div>
                   </div>
+
+                  {showStatus.status === 'waiting_for_group' && (
+                    <button
+                      onClick={async () => {
+                        const token = localStorage.getItem('auth_token');
+                        await fetch('https://api.questcity.cloud/myhamsteracademia/api/show/force-trigger-timer', {
+                          method: 'POST',
+                          headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                      }}
+                      style={{
+                        marginTop: '20px', padding: '10px 24px', borderRadius: '8px',
+                        backgroundColor: 'rgba(87, 196, 160, 0.1)', color: '#57c4a0',
+                        border: '1px solid #57c4a0', cursor: 'pointer', fontWeight: 700, fontSize: '14px',
+                        transition: 'all 0.2s'
+                      }}
+                      onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'rgba(87, 196, 160, 0.2)'}
+                      onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'rgba(87, 196, 160, 0.1)'}
+                    >
+                      FORCE START ⚡
+                    </button>
+                  )}
                 </div>
 
                 <div style={{ display: 'flex', gap: '16px', marginTop: '24px' }}>
