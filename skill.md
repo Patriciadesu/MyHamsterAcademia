@@ -81,3 +81,8 @@
 ## Commit: Update class filter to foldout and optimize for desktop
 - Replaced the standard `<select>` dropdown for Class filtering with a custom expandable "foldout" component using React state.
 - Enhanced layout responsiveness by converting the main container to `maxWidth: 1200px` and implementing CSS Grid for the user cards to fully utilize desktop screen space.
+
+## Commit: Change to class-specific foldout panels
+- Completely overhauled the list architecture: Removed the global class filter and replaced it with dedicated, independent foldout sections for each class ("Starway", "NSC").
+- Both class sections can remain open simultaneously.
+- Integrated the user search input so it securely filters users within whichever class sections are currently open.
