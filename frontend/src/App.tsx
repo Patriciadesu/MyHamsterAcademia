@@ -161,8 +161,7 @@ function Admin() {
     NSC: false
   });
 
-  // Sample data to match the design (pending real database integration)
-  const mockUsers = [
+  const initialMockUsers = [
     { name: 'Alex Rivera', role: 'Administrator', class: 'Starway', group: 'Alpha', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBImaEad57FWQDvnwqLZAqvVKWlA6y7J2f-vo0jq-hRduSdYu_e5wBwmAIhBWwS6ONpI4_yNKmIsj_PveP78KIETXyGP1DRL0UCr931-drf7PsCI-gS__AViWvCxCg9G1KSiXTbzPPZKB9AemyNc-aLPxXaVPqMY03YtYfkVHv_YGAU-2GJPrZ_BEhuiqNw6nz_fpfsitlaNsGKYJjdNGiRJbvTG8Ub-ZCVjr2VOnyW8Aghvv5CgJeEvPA0K9OwrCb4q5J9CWtf560d' },
     { name: 'Jordan Chen', role: 'Moderator', class: 'NSC', group: 'Gamma', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBjC-hxQ5DIJKaejVVgeUP2qNUJ0AhqLhsHB4dCv7O60SPE61OLJI9JldrgobVu8fBDrZufw_Sj9Q326GKSJbeo1xncAOWLmeei1V5oYVrEgFVgRKSxx7ItJHvxzarsGhKekEOx2dH7bRaOgh3dwQ_ct8EkCqKQWTiAp9O7V7ApEKF5gj_srDIu_ufRZ2PZzECAFZ1Jl4GoYEGaYCSi1Mz-aTPLKfNaPSW0sJu-pIaib6eC_vQIWm6vTHh1IBQuhPI9hhtj42nhus-0' },
     { name: 'Sarah Jenkins', role: 'Support', class: 'Starway', group: 'Beta', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBHDasXk9Y5tTv4TN9qnC-6TiofwhEdN1rJ7MAVanqHFf_eZ5Sc6xbHwSxp2hHWD-UJyxfIPymN-A3tlB6QQ3zlKht57Bn0uv-ozCl-L7xKZwUryQvldeKfFQCOQckASX-dMMnSVXxZ00a8J8zE0cnw-jyItN8ym-THlZEZqW0R2_61HM0Vc5I67Y7CNkVdhWvbVTXYYsxYvvgokBAa6X7fr6fDLfxVKBaoRyd0c5eC0VOBJT-hNS3up2jkLV2W07N1V2eBte3EHXjz' },
@@ -191,6 +190,9 @@ function Admin() {
     { name: 'Mason Clark', role: 'User', class: 'NSC', group: '', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCiUpNMiB2cxltQ6UGv7IqSVQ6BRpb5flOBbjOeHtyOXaY6-5G_xDMtIPSt2eUccClBWGvKpgrDqOvbNsvIwLdjFEwZQcPSSJQArFeOiBhVEBbwVZnrgI4xhokHRzSsnIPu_-qpTqY1kaHUQ21fKgA0-OmZp3tXLfvvU0VHFkIFY3Q_rhUTA3_kzl5gnes0N5zhR7Z_A5uIZsCxnjO7tefVOXsEgsnibF7w7PM6g3mGFI3vyKU05ic0IF1Fx9S2tmk9PCO9zUt8m0iy' }
   ];
 
+  const [users, setUsers] = useState(initialMockUsers);
+  const [openGroupSections, setOpenGroupSections] = useState<Record<string, boolean>>({});
+
   const toggleSection = (section: string) => {
     setOpenSections(prev => ({ ...prev, [section]: !prev[section as keyof typeof openSections] }));
   };
@@ -199,9 +201,34 @@ function Admin() {
     setGroupView(prev => ({ ...prev, [section]: !prev[section as keyof typeof groupView] }));
   };
 
+  const toggleGroupSection = (groupKey: string) => {
+    setOpenGroupSections(prev => ({ ...prev, [groupKey]: prev[groupKey] === undefined ? false : !prev[groupKey] }));
+  };
+
+  const handleDragStart = (e: any, userName: string) => {
+    e.dataTransfer.setData('userName', userName);
+  };
+
+  const handleDrop = (e: any, targetGroup: string) => {
+    e.preventDefault();
+    const userName = e.dataTransfer.getData('userName');
+    setUsers(prev => prev.map(u => u.name === userName ? { ...u, group: targetGroup === 'Ungrouped' ? '' : targetGroup } : u));
+  };
+
+  const handleDragOver = (e: any) => {
+    e.preventDefault();
+  };
+
   const renderUserCard = (u: any, i: number) => (
-    <div key={i} style={{ backgroundColor: '#272a30', border: '1px solid rgba(68, 70, 81, 0.3)', borderRadius: '12px', padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', transition: 'background-color 0.2s' }} onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#32353b'} onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#272a30'}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+    <div 
+      key={i} 
+      draggable
+      onDragStart={(e) => handleDragStart(e, u.name)}
+      style={{ backgroundColor: '#272a30', border: '1px solid rgba(68, 70, 81, 0.3)', borderRadius: '12px', padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'grab', transition: 'background-color 0.2s', userSelect: 'none' }} 
+      onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#32353b'} 
+      onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#272a30'}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: '16px', pointerEvents: 'none' }}>
         <div style={{ width: '48px', height: '48px', borderRadius: '8px', overflow: 'hidden', backgroundColor: '#1d2025', flexShrink: 0 }}>
           <img src={u.img} alt={u.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         </div>
@@ -218,7 +245,7 @@ function Admin() {
   );
 
   const renderClassSection = (className: string) => {
-    const usersInClass = mockUsers.filter(u => u.class === className && u.name.toLowerCase().includes(searchQuery.toLowerCase()));
+    const usersInClass = users.filter(u => u.class === className && u.name.toLowerCase().includes(searchQuery.toLowerCase()));
     const isOpen = openSections[className as keyof typeof openSections];
     const isGroupView = groupView[className as keyof typeof groupView];
 
@@ -237,29 +264,54 @@ function Admin() {
         if (!acc[g]) acc[g] = [];
         acc[g].push(user);
         return acc;
-      }, {} as Record<string, typeof mockUsers>);
+      }, {} as Record<string, typeof initialMockUsers>);
 
       const groups = Object.keys(grouped).filter(g => g !== 'Ungrouped').sort();
       const ungrouped = grouped['Ungrouped'] || [];
 
+      const renderGroupFoldout = (groupName: string, groupUsers: typeof initialMockUsers) => {
+        const groupKey = `${className}-${groupName}`;
+        const isGroupOpen = openGroupSections[groupKey] !== false; // default true
+
+        return (
+          <div 
+            key={groupKey}
+            onDragOver={handleDragOver}
+            onDrop={(e) => handleDrop(e, groupName)}
+            style={{ backgroundColor: '#1d2025', borderRadius: '8px', border: '1px dashed #444651', overflow: 'hidden' }}
+          >
+            <button 
+              onClick={() => toggleGroupSection(groupKey)}
+              style={{ width: '100%', padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#23262b', border: 'none', cursor: 'pointer', outline: 'none' }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '14px', fontWeight: 600, color: groupName === 'Ungrouped' ? '#8f909c' : '#e0e2ea' }}>
+                  {groupName === 'Ungrouped' ? 'Ungrouped Users' : `Group ${groupName}`}
+                </span>
+                <span style={{ fontSize: '11px', color: '#8f909c', backgroundColor: '#191c21', padding: '2px 8px', borderRadius: '12px' }}>{groupUsers.length}</span>
+              </div>
+              <span style={{ transform: isGroupOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', fontSize: '12px', color: '#8f909c' }}>▼</span>
+            </button>
+
+            {isGroupOpen && (
+              <div style={{ padding: '16px' }}>
+                {groupUsers.length > 0 ? (
+                  <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
+                    {groupUsers.map((u, i) => renderUserCard(u, i))}
+                  </section>
+                ) : (
+                  <div style={{ color: '#8f909c', fontSize: '13px', textAlign: 'center', padding: '12px 0' }}>Drop users here</div>
+                )}
+              </div>
+            )}
+          </div>
+        );
+      };
+
       content = (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-          {groups.map(g => (
-            <div key={g}>
-              <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#e0e2ea', marginBottom: '12px', paddingBottom: '8px', borderBottom: '1px solid #272a30' }}>Group {g}</h3>
-              <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
-                {grouped[g].map((u, i) => renderUserCard(u, i))}
-              </section>
-            </div>
-          ))}
-          {ungrouped.length > 0 && (
-            <div>
-              <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#8f909c', marginBottom: '12px', paddingBottom: '8px', borderBottom: '1px solid #272a30' }}>Ungrouped</h3>
-              <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
-                {ungrouped.map((u, i) => renderUserCard(u, i))}
-              </section>
-            </div>
-          )}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {groups.map(g => renderGroupFoldout(g, grouped[g]))}
+          {renderGroupFoldout('Ungrouped', ungrouped)}
         </div>
       );
     }
