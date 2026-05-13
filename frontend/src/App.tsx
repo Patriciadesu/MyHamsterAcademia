@@ -48,27 +48,23 @@ function Main() {
   const location = useLocation();
 
   useEffect(() => {
-    // Check url for token
     const params = new URLSearchParams(location.search);
     const tokenFromUrl = params.get('token');
-    
+
     if (tokenFromUrl) {
       localStorage.setItem('auth_token', tokenFromUrl);
-      navigate('/main', { replace: true }); // clear url
+      navigate('/main', { replace: true });
     }
 
     const token = tokenFromUrl || localStorage.getItem('auth_token');
-    
+
     if (!token) {
       navigate('/');
       return;
     }
 
-    // Fetch user info
     fetch('https://api.questcity.cloud/myhamsteracademia/api/auth/me', {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
+      headers: { 'Authorization': `Bearer ${token}` }
     })
       .then(res => res.json())
       .then(data => {
@@ -79,74 +75,14 @@ function Main() {
           setUser(data);
         }
       })
-      .catch(err => {
-        console.error(err);
-      });
+      .catch(err => console.error(err));
   }, [navigate, location]);
 
-  const handleLogout = () => {
-    localStorage.removeItem('auth_token');
-    navigate('/');
-  }
-
-  if (!user) {
-    return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', height: '100%' }}>Loading...</div>;
-  }
-
-  const avatarUrl = user.avatar 
-    ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
-    : `https://cdn.discordapp.com/embed/avatars/${parseInt(user.discriminator) % 5}.png`;
+  if (!user) return null;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
-      <div style={{ backgroundColor: '#2f3136', padding: '40px', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', textAlign: 'center', width: '350px' }}>
-        <img src={avatarUrl} alt="Avatar" style={{ borderRadius: '50%', width: '100px', height: '100px', marginBottom: '20px' }} />
-        <h2>{user.username}#{user.discriminator}</h2>
-        <p style={{ color: '#b9bbbe', marginTop: '5px', marginBottom: '15px' }}>{user.email}</p>
-        
-        {user.role === 'admin' && (
-          <div style={{ backgroundColor: '#faa61a', color: 'white', padding: '5px 10px', borderRadius: '15px', fontSize: '12px', fontWeight: 'bold', display: 'inline-block', marginBottom: '20px' }}>
-            ADMIN
-          </div>
-        )}
-
-        {user.role === 'admin' && (
-          <button 
-            onClick={() => navigate('/admin')}
-            style={{ 
-              backgroundColor: '#5865F2', 
-              color: 'white', 
-              border: 'none', 
-              padding: '10px 20px', 
-              borderRadius: '4px', 
-              marginBottom: '10px',
-              cursor: 'pointer',
-              width: '100%',
-              fontWeight: 'bold'
-            }}
-          >
-            Admin Panel
-          </button>
-        )}
-
-        <button 
-          onClick={handleLogout}
-          style={{ 
-            backgroundColor: '#ed4245', 
-            color: 'white', 
-            border: 'none', 
-            padding: '10px 20px', 
-            borderRadius: '4px', 
-            cursor: 'pointer',
-            width: '100%',
-            fontWeight: 'bold'
-          }}
-        >
-          Logout
-        </button>
-      </div>
-    </div>
-  )
+    <div style={{ width: '100%', height: '100%', backgroundColor: '#36393f' }} />
+  );
 }
 
 function Admin() {

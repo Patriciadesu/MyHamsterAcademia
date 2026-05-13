@@ -169,3 +169,7 @@
 - Added GET /api/groups/queue/:class endpoint to retrieve the last saved queue for a class.
 - Selecting a class button now immediately fetches and displays the current saved queue from the database.
 - If no queue has been randomized yet for that class, result area remains empty until RANDOM is pressed.
+
+## Commit: Reset Main page to blank
+- Replaced all UI content in the Main component with a plain empty div matching the background color.
+- Auth/redirect logic is preserved: token handling, API call to /api/auth/me, and redirect to login if unauthenticated.
