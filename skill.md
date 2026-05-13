@@ -145,3 +145,11 @@
 - Clicking a tab switches the main content area accordingly.
 - Random Queue and Show Manager are blank placeholder pages with "Coming soon..." text.
 - Group View toggle only appears in the header when on the User Management tab.
+
+## Commit: Add Group model and Random Queue feature
+- Created backend/models/Group.js with name, class, users, queue, and lastRandomized fields.
+- Added GET /api/groups endpoint to retrieve all groups with populated user data.
+- Added POST /api/groups/randomize-all endpoint that buckets users by their group field, shuffles each group using Fisher-Yates algorithm, upserts Group documents, and returns results.
+- Replaced Random Queue placeholder with a large red meme-style circular button in the center.
+- Clicking the button calls randomize-all and displays each group's shuffled queue as numbered cards.
+- First place in each group is highlighted with a blue accent and a "FIRST" label.

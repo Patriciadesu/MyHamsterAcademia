@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 
 const User = require('./models/User');
+const Group = require('./models/Group');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -213,6 +214,62 @@ app.put('/api/users/:id/class', requireAdmin, async (req, res) => {
     res.json({ success: true, user });
   } catch (err) {
     res.status(500).json({ error: 'Failed to update class' });
+  }
+});
+
+// Get all groups with populated users and queue
+app.get('/api/groups', requireAdmin, async (req, res) => {
+  try {
+    const groups = await Group.find({}).populate('users', 'username avatar discordId discriminator').populate('queue', 'username avatar discordId discriminator');
+    res.json(groups);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch groups' });
+  }
+});
+
+// Randomize queue for every group derived from User.group field
+app.post('/api/groups/randomize-all', requireAdmin, async (req, res) => {
+  try {
+    // Get all users that have a group assigned
+    const usersWithGroup = await User.find({ group: { $exists: true, $ne: '' } });
+
+    // Bucket users by group name
+    const buckets = {};
+    for (const user of usersWithGroup) {
+      const g = user.group;
+      if (!buckets[g]) buckets[g] = [];
+      buckets[g].push(user);
+    }
+
+    const results = [];
+    for (const [groupName, members] of Object.entries(buckets)) {
+      // Fisher-Yates shuffle
+      const shuffled = [...members];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+
+      // Upsert the Group document
+      const group = await Group.findOneAndUpdate(
+        { name: groupName },
+        {
+          name: groupName,
+          class: members[0].class,
+          users: members.map(u => u._id),
+          queue: shuffled.map(u => u._id),
+          lastRandomized: new Date(),
+        },
+        { upsert: true, new: true }
+      ).populate('queue', 'username avatar discordId discriminator');
+
+      results.push(group);
+    }
+
+    res.json(results);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to randomize queues' });
   }
 });
 
