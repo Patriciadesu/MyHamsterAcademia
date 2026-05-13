@@ -19,3 +19,7 @@
 ## Commit: Use pm2 to run frontend and backend
 - Replaced concurrently with pm2 in root package.json.
 - Created ecosystem.config.js to manage frontend (Vite) and backend (Express) processes.
+
+## Commit: Create .env file
+- Added backend/.env file with MongoDB connection string, frontend URL, Discord placeholders, and necessary vars.
+- Updated .gitignore to exclude .env files to ensure security.
