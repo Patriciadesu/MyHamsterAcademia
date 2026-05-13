@@ -109,19 +109,23 @@ function Main() {
 
   // Timer logic
   useEffect(() => {
+    let interval: any;
     if (showStatus?.status === 'timer_running' && showStatus.timerStartedAt) {
-      const timer = setInterval(() => {
-        const start = new Date(showStatus.timerStartedAt).getTime();
-        const now = new Date().getTime();
-        const elapsed = Math.floor((now - start) / 1000);
-        const remaining = Math.max(0, showStatus.timerDuration - elapsed);
-        setTimeLeft(remaining);
-        if (remaining <= 0) clearInterval(timer);
-      }, 1000);
-      return () => clearInterval(timer);
+      const start = new Date(showStatus.timerStartedAt).getTime();
+      const duration = (showStatus.timerDuration || 120) * 1000;
+      
+      const tick = () => {
+        const now = Date.now();
+        const diff = Math.max(0, Math.floor((start + duration - now) / 1000));
+        setTimeLeft(diff);
+      };
+      
+      tick();
+      interval = setInterval(tick, 1000);
     } else {
       setTimeLeft(null);
     }
+    return () => { if (interval) clearInterval(interval); };
   }, [showStatus]);
 
   if (!user) return null;
@@ -322,10 +326,16 @@ function Main() {
             onClick={async () => {
               try {
                 const token = localStorage.getItem('auth_token');
-                await fetch('https://api.questcity.cloud/myhamsteracademia/api/show/trigger-timer', {
+                const res = await fetch('https://api.questcity.cloud/myhamsteracademia/api/show/trigger-timer', {
                   method: 'POST',
                   headers: { 'Authorization': `Bearer ${token}` }
                 });
+                if (res.ok) {
+                  // Refresh status immediately
+                  const statusRes = await fetch('https://api.questcity.cloud/myhamsteracademia/api/show/status');
+                  const statusData = await statusRes.json();
+                  setShowStatus(statusData);
+                }
               } catch (err) {
                 console.error(err);
               }

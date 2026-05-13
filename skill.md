@@ -243,3 +243,9 @@
   - Added "NEXT GROUP ➡️" button for admins to advance the queue.
   - Added "END SHOW ⏹️" button to reset the show state to idle.
 - Synchronized show state across the Admin and Main dashboards via 3-second polling intervals.
+
+## Commit: Fix 2-minute timer display and trigger responsiveness
+- Resolved an issue where the timer would not appear immediately after a group member clicked "START SHOW".
+- Added an immediate status fetch after the trigger API call to eliminate the 3-second polling delay.
+- Rewrote the timer calculation logic to be more robust, using absolute timestamps (`timerStartedAt`) and adding a fallback for `timerDuration`.
+- Fixed a bug where `timeLeft` could become `NaN` if the duration field was missing from the initial state.
