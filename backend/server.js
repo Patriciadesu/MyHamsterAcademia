@@ -159,6 +159,47 @@ app.get('/api/auth/me', async (req, res) => {
   }
 });
 
+const requireAdmin = async (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) return res.status(401).json({ error: 'No token provided' });
+  const token = authHeader.split(' ')[1];
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    if (decoded.role !== 'admin') {
+      return res.status(403).json({ error: 'Forbidden: Admins only' });
+    }
+    req.user = decoded;
+    next();
+  } catch (err) {
+    res.status(401).json({ error: 'Invalid token' });
+  }
+};
+
+app.get('/api/users', requireAdmin, async (req, res) => {
+  try {
+    const users = await User.find({});
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch users' });
+  }
+});
+
+app.put('/api/users/:id/group', requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { group } = req.body;
+    
+    const user = await User.findById(id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    
+    user.group = group || '';
+    await user.save();
+    res.json({ success: true, user });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update group' });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Backend server running on port ${PORT}`);
 });

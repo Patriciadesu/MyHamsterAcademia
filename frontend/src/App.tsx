@@ -165,47 +165,49 @@ function Admin() {
     Unassigned: false
   });
 
-  const initialMockUsers = [
-    { name: 'Alex Rivera', role: 'Administrator', class: 'Starway', group: 'Alpha', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBImaEad57FWQDvnwqLZAqvVKWlA6y7J2f-vo0jq-hRduSdYu_e5wBwmAIhBWwS6ONpI4_yNKmIsj_PveP78KIETXyGP1DRL0UCr931-drf7PsCI-gS__AViWvCxCg9G1KSiXTbzPPZKB9AemyNc-aLPxXaVPqMY03YtYfkVHv_YGAU-2GJPrZ_BEhuiqNw6nz_fpfsitlaNsGKYJjdNGiRJbvTG8Ub-ZCVjr2VOnyW8Aghvv5CgJeEvPA0K9OwrCb4q5J9CWtf560d' },
-    { name: 'Jordan Chen', role: 'Moderator', class: 'NSC', group: 'Gamma', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBjC-hxQ5DIJKaejVVgeUP2qNUJ0AhqLhsHB4dCv7O60SPE61OLJI9JldrgobVu8fBDrZufw_Sj9Q326GKSJbeo1xncAOWLmeei1V5oYVrEgFVgRKSxx7ItJHvxzarsGhKekEOx2dH7bRaOgh3dwQ_ct8EkCqKQWTiAp9O7V7ApEKF5gj_srDIu_ufRZ2PZzECAFZ1Jl4GoYEGaYCSi1Mz-aTPLKfNaPSW0sJu-pIaib6eC_vQIWm6vTHh1IBQuhPI9hhtj42nhus-0' },
-    { name: 'Sarah Jenkins', role: 'Support', class: 'Starway', group: 'Beta', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBHDasXk9Y5tTv4TN9qnC-6TiofwhEdN1rJ7MAVanqHFf_eZ5Sc6xbHwSxp2hHWD-UJyxfIPymN-A3tlB6QQ3zlKht57Bn0uv-ozCl-L7xKZwUryQvldeKfFQCOQckASX-dMMnSVXxZ00a8J8zE0cnw-jyItN8ym-THlZEZqW0R2_61HM0Vc5I67Y7CNkVdhWvbVTXYYsxYvvgokBAa6X7fr6fDLfxVKBaoRyd0c5eC0VOBJT-hNS3up2jkLV2W07N1V2eBte3EHXjz' },
-    { name: 'Marcus Thorne', role: 'User', class: 'NSC', group: 'Gamma', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCiUpNMiB2cxltQ6UGv7IqSVQ6BRpb5flOBbjOeHtyOXaY6-5G_xDMtIPSt2eUccClBWGvKpgrDqOvbNsvIwLdjFEwZQcPSSJQArFeOiBhVEBbwVZnrgI4xhokHRzSsnIPu_-qpTqY1kaHUQ21fKgA0-OmZp3tXLfvvU0VHFkIFY3Q_rhUTA3_kzl5gnes0N5zhR7Z_A5uIZsCxnjO7tefVOXsEgsnibF7w7PM6g3mGFI3vyKU05ic0IF1Fx9S2tmk9PCO9zUt8m0iy' },
-    // 10 new Starway
-    { name: 'Emily Vance', role: 'User', class: 'Starway', group: 'Alpha', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBImaEad57FWQDvnwqLZAqvVKWlA6y7J2f-vo0jq-hRduSdYu_e5wBwmAIhBWwS6ONpI4_yNKmIsj_PveP78KIETXyGP1DRL0UCr931-drf7PsCI-gS__AViWvCxCg9G1KSiXTbzPPZKB9AemyNc-aLPxXaVPqMY03YtYfkVHv_YGAU-2GJPrZ_BEhuiqNw6nz_fpfsitlaNsGKYJjdNGiRJbvTG8Ub-ZCVjr2VOnyW8Aghvv5CgJeEvPA0K9OwrCb4q5J9CWtf560d' },
-    { name: 'Michael Chang', role: 'User', class: 'Starway', group: 'Alpha', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBjC-hxQ5DIJKaejVVgeUP2qNUJ0AhqLhsHB4dCv7O60SPE61OLJI9JldrgobVu8fBDrZufw_Sj9Q326GKSJbeo1xncAOWLmeei1V5oYVrEgFVgRKSxx7ItJHvxzarsGhKekEOx2dH7bRaOgh3dwQ_ct8EkCqKQWTiAp9O7V7ApEKF5gj_srDIu_ufRZ2PZzECAFZ1Jl4GoYEGaYCSi1Mz-aTPLKfNaPSW0sJu-pIaib6eC_vQIWm6vTHh1IBQuhPI9hhtj42nhus-0' },
-    { name: 'Sophia Martinez', role: 'Moderator', class: 'Starway', group: 'Beta', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBHDasXk9Y5tTv4TN9qnC-6TiofwhEdN1rJ7MAVanqHFf_eZ5Sc6xbHwSxp2hHWD-UJyxfIPymN-A3tlB6QQ3zlKht57Bn0uv-ozCl-L7xKZwUryQvldeKfFQCOQckASX-dMMnSVXxZ00a8J8zE0cnw-jyItN8ym-THlZEZqW0R2_61HM0Vc5I67Y7CNkVdhWvbVTXYYsxYvvgokBAa6X7fr6fDLfxVKBaoRyd0c5eC0VOBJT-hNS3up2jkLV2W07N1V2eBte3EHXjz' },
-    { name: 'David Kim', role: 'User', class: 'Starway', group: 'Beta', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCiUpNMiB2cxltQ6UGv7IqSVQ6BRpb5flOBbjOeHtyOXaY6-5G_xDMtIPSt2eUccClBWGvKpgrDqOvbNsvIwLdjFEwZQcPSSJQArFeOiBhVEBbwVZnrgI4xhokHRzSsnIPu_-qpTqY1kaHUQ21fKgA0-OmZp3tXLfvvU0VHFkIFY3Q_rhUTA3_kzl5gnes0N5zhR7Z_A5uIZsCxnjO7tefVOXsEgsnibF7w7PM6g3mGFI3vyKU05ic0IF1Fx9S2tmk9PCO9zUt8m0iy' },
-    { name: 'Olivia Rossi', role: 'User', class: 'Starway', group: '', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBImaEad57FWQDvnwqLZAqvVKWlA6y7J2f-vo0jq-hRduSdYu_e5wBwmAIhBWwS6ONpI4_yNKmIsj_PveP78KIETXyGP1DRL0UCr931-drf7PsCI-gS__AViWvCxCg9G1KSiXTbzPPZKB9AemyNc-aLPxXaVPqMY03YtYfkVHv_YGAU-2GJPrZ_BEhuiqNw6nz_fpfsitlaNsGKYJjdNGiRJbvTG8Ub-ZCVjr2VOnyW8Aghvv5CgJeEvPA0K9OwrCb4q5J9CWtf560d' },
-    { name: 'James Wilson', role: 'User', class: 'Starway', group: '', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBjC-hxQ5DIJKaejVVgeUP2qNUJ0AhqLhsHB4dCv7O60SPE61OLJI9JldrgobVu8fBDrZufw_Sj9Q326GKSJbeo1xncAOWLmeei1V5oYVrEgFVgRKSxx7ItJHvxzarsGhKekEOx2dH7bRaOgh3dwQ_ct8EkCqKQWTiAp9O7V7ApEKF5gj_srDIu_ufRZ2PZzECAFZ1Jl4GoYEGaYCSi1Mz-aTPLKfNaPSW0sJu-pIaib6eC_vQIWm6vTHh1IBQuhPI9hhtj42nhus-0' },
-    { name: 'Chloe Bennett', role: 'User', class: 'Starway', group: '', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBHDasXk9Y5tTv4TN9qnC-6TiofwhEdN1rJ7MAVanqHFf_eZ5Sc6xbHwSxp2hHWD-UJyxfIPymN-A3tlB6QQ3zlKht57Bn0uv-ozCl-L7xKZwUryQvldeKfFQCOQckASX-dMMnSVXxZ00a8J8zE0cnw-jyItN8ym-THlZEZqW0R2_61HM0Vc5I67Y7CNkVdhWvbVTXYYsxYvvgokBAa6X7fr6fDLfxVKBaoRyd0c5eC0VOBJT-hNS3up2jkLV2W07N1V2eBte3EHXjz' },
-    { name: 'Daniel Foster', role: 'User', class: 'Starway', group: '', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCiUpNMiB2cxltQ6UGv7IqSVQ6BRpb5flOBbjOeHtyOXaY6-5G_xDMtIPSt2eUccClBWGvKpgrDqOvbNsvIwLdjFEwZQcPSSJQArFeOiBhVEBbwVZnrgI4xhokHRzSsnIPu_-qpTqY1kaHUQ21fKgA0-OmZp3tXLfvvU0VHFkIFY3Q_rhUTA3_kzl5gnes0N5zhR7Z_A5uIZsCxnjO7tefVOXsEgsnibF7w7PM6g3mGFI3vyKU05ic0IF1Fx9S2tmk9PCO9zUt8m0iy' },
-    { name: 'Mia Nguyen', role: 'Support', class: 'Starway', group: '', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBImaEad57FWQDvnwqLZAqvVKWlA6y7J2f-vo0jq-hRduSdYu_e5wBwmAIhBWwS6ONpI4_yNKmIsj_PveP78KIETXyGP1DRL0UCr931-drf7PsCI-gS__AViWvCxCg9G1KSiXTbzPPZKB9AemyNc-aLPxXaVPqMY03YtYfkVHv_YGAU-2GJPrZ_BEhuiqNw6nz_fpfsitlaNsGKYJjdNGiRJbvTG8Ub-ZCVjr2VOnyW8Aghvv5CgJeEvPA0K9OwrCb4q5J9CWtf560d' },
-    { name: 'Liam O\'Connor', role: 'User', class: 'Starway', group: '', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBjC-hxQ5DIJKaejVVgeUP2qNUJ0AhqLhsHB4dCv7O60SPE61OLJI9JldrgobVu8fBDrZufw_Sj9Q326GKSJbeo1xncAOWLmeei1V5oYVrEgFVgRKSxx7ItJHvxzarsGhKekEOx2dH7bRaOgh3dwQ_ct8EkCqKQWTiAp9O7V7ApEKF5gj_srDIu_ufRZ2PZzECAFZ1Jl4GoYEGaYCSi1Mz-aTPLKfNaPSW0sJu-pIaib6eC_vQIWm6vTHh1IBQuhPI9hhtj42nhus-0' },
-    // 10 new NSC
-    { name: 'Isabella Schmidt', role: 'User', class: 'NSC', group: 'Delta', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBHDasXk9Y5tTv4TN9qnC-6TiofwhEdN1rJ7MAVanqHFf_eZ5Sc6xbHwSxp2hHWD-UJyxfIPymN-A3tlB6QQ3zlKht57Bn0uv-ozCl-L7xKZwUryQvldeKfFQCOQckASX-dMMnSVXxZ00a8J8zE0cnw-jyItN8ym-THlZEZqW0R2_61HM0Vc5I67Y7CNkVdhWvbVTXYYsxYvvgokBAa6X7fr6fDLfxVKBaoRyd0c5eC0VOBJT-hNS3up2jkLV2W07N1V2eBte3EHXjz' },
-    { name: 'Ethan Hunt', role: 'User', class: 'NSC', group: 'Delta', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCiUpNMiB2cxltQ6UGv7IqSVQ6BRpb5flOBbjOeHtyOXaY6-5G_xDMtIPSt2eUccClBWGvKpgrDqOvbNsvIwLdjFEwZQcPSSJQArFeOiBhVEBbwVZnrgI4xhokHRzSsnIPu_-qpTqY1kaHUQ21fKgA0-OmZp3tXLfvvU0VHFkIFY3Q_rhUTA3_kzl5gnes0N5zhR7Z_A5uIZsCxnjO7tefVOXsEgsnibF7w7PM6g3mGFI3vyKU05ic0IF1Fx9S2tmk9PCO9zUt8m0iy' },
-    { name: 'Ava Patel', role: 'User', class: 'NSC', group: 'Delta', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBImaEad57FWQDvnwqLZAqvVKWlA6y7J2f-vo0jq-hRduSdYu_e5wBwmAIhBWwS6ONpI4_yNKmIsj_PveP78KIETXyGP1DRL0UCr931-drf7PsCI-gS__AViWvCxCg9G1KSiXTbzPPZKB9AemyNc-aLPxXaVPqMY03YtYfkVHv_YGAU-2GJPrZ_BEhuiqNw6nz_fpfsitlaNsGKYJjdNGiRJbvTG8Ub-ZCVjr2VOnyW8Aghvv5CgJeEvPA0K9OwrCb4q5J9CWtf560d' },
-    { name: 'William Davies', role: 'User', class: 'NSC', group: '', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBjC-hxQ5DIJKaejVVgeUP2qNUJ0AhqLhsHB4dCv7O60SPE61OLJI9JldrgobVu8fBDrZufw_Sj9Q326GKSJbeo1xncAOWLmeei1V5oYVrEgFVgRKSxx7ItJHvxzarsGhKekEOx2dH7bRaOgh3dwQ_ct8EkCqKQWTiAp9O7V7ApEKF5gj_srDIu_ufRZ2PZzECAFZ1Jl4GoYEGaYCSi1Mz-aTPLKfNaPSW0sJu-pIaib6eC_vQIWm6vTHh1IBQuhPI9hhtj42nhus-0' },
-    { name: 'Harper Moore', role: 'User', class: 'NSC', group: '', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBHDasXk9Y5tTv4TN9qnC-6TiofwhEdN1rJ7MAVanqHFf_eZ5Sc6xbHwSxp2hHWD-UJyxfIPymN-A3tlB6QQ3zlKht57Bn0uv-ozCl-L7xKZwUryQvldeKfFQCOQckASX-dMMnSVXxZ00a8J8zE0cnw-jyItN8ym-THlZEZqW0R2_61HM0Vc5I67Y7CNkVdhWvbVTXYYsxYvvgokBAa6X7fr6fDLfxVKBaoRyd0c5eC0VOBJT-hNS3up2jkLV2W07N1V2eBte3EHXjz' },
-    { name: 'Benjamin White', role: 'Moderator', class: 'NSC', group: '', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCiUpNMiB2cxltQ6UGv7IqSVQ6BRpb5flOBbjOeHtyOXaY6-5G_xDMtIPSt2eUccClBWGvKpgrDqOvbNsvIwLdjFEwZQcPSSJQArFeOiBhVEBbwVZnrgI4xhokHRzSsnIPu_-qpTqY1kaHUQ21fKgA0-OmZp3tXLfvvU0VHFkIFY3Q_rhUTA3_kzl5gnes0N5zhR7Z_A5uIZsCxnjO7tefVOXsEgsnibF7w7PM6g3mGFI3vyKU05ic0IF1Fx9S2tmk9PCO9zUt8m0iy' },
-    { name: 'Amelia Taylor', role: 'User', class: 'NSC', group: '', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBImaEad57FWQDvnwqLZAqvVKWlA6y7J2f-vo0jq-hRduSdYu_e5wBwmAIhBWwS6ONpI4_yNKmIsj_PveP78KIETXyGP1DRL0UCr931-drf7PsCI-gS__AViWvCxCg9G1KSiXTbzPPZKB9AemyNc-aLPxXaVPqMY03YtYfkVHv_YGAU-2GJPrZ_BEhuiqNw6nz_fpfsitlaNsGKYJjdNGiRJbvTG8Ub-ZCVjr2VOnyW8Aghvv5CgJeEvPA0K9OwrCb4q5J9CWtf560d' },
-    { name: 'Lucas Anderson', role: 'User', class: 'NSC', group: '', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBjC-hxQ5DIJKaejVVgeUP2qNUJ0AhqLhsHB4dCv7O60SPE61OLJI9JldrgobVu8fBDrZufw_Sj9Q326GKSJbeo1xncAOWLmeei1V5oYVrEgFVgRKSxx7ItJHvxzarsGhKekEOx2dH7bRaOgh3dwQ_ct8EkCqKQWTiAp9O7V7ApEKF5gj_srDIu_ufRZ2PZzECAFZ1Jl4GoYEGaYCSi1Mz-aTPLKfNaPSW0sJu-pIaib6eC_vQIWm6vTHh1IBQuhPI9hhtj42nhus-0' },
-    { name: 'Evelyn Thomas', role: 'User', class: 'NSC', group: '', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBHDasXk9Y5tTv4TN9qnC-6TiofwhEdN1rJ7MAVanqHFf_eZ5Sc6xbHwSxp2hHWD-UJyxfIPymN-A3tlB6QQ3zlKht57Bn0uv-ozCl-L7xKZwUryQvldeKfFQCOQckASX-dMMnSVXxZ00a8J8zE0cnw-jyItN8ym-THlZEZqW0R2_61HM0Vc5I67Y7CNkVdhWvbVTXYYsxYvvgokBAa6X7fr6fDLfxVKBaoRyd0c5eC0VOBJT-hNS3up2jkLV2W07N1V2eBte3EHXjz' },
-    { name: 'Mason Clark', role: 'User', class: 'NSC', group: '', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCiUpNMiB2cxltQ6UGv7IqSVQ6BRpb5flOBbjOeHtyOXaY6-5G_xDMtIPSt2eUccClBWGvKpgrDqOvbNsvIwLdjFEwZQcPSSJQArFeOiBhVEBbwVZnrgI4xhokHRzSsnIPu_-qpTqY1kaHUQ21fKgA0-OmZp3tXLfvvU0VHFkIFY3Q_rhUTA3_kzl5gnes0N5zhR7Z_A5uIZsCxnjO7tefVOXsEgsnibF7w7PM6g3mGFI3vyKU05ic0IF1Fx9S2tmk9PCO9zUt8m0iy' },
-    // 5 new Staff
-    { name: 'Admin Pat', role: 'Administrator', class: 'Staff', group: 'Management', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCiUpNMiB2cxltQ6UGv7IqSVQ6BRpb5flOBbjOeHtyOXaY6-5G_xDMtIPSt2eUccClBWGvKpgrDqOvbNsvIwLdjFEwZQcPSSJQArFeOiBhVEBbwVZnrgI4xhokHRzSsnIPu_-qpTqY1kaHUQ21fKgA0-OmZp3tXLfvvU0VHFkIFY3Q_rhUTA3_kzl5gnes0N5zhR7Z_A5uIZsCxnjO7tefVOXsEgsnibF7w7PM6g3mGFI3vyKU05ic0IF1Fx9S2tmk9PCO9zUt8m0iy' },
-    { name: 'Mod Sarah', role: 'Moderator', class: 'Staff', group: 'Moderation', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBImaEad57FWQDvnwqLZAqvVKWlA6y7J2f-vo0jq-hRduSdYu_e5wBwmAIhBWwS6ONpI4_yNKmIsj_PveP78KIETXyGP1DRL0UCr931-drf7PsCI-gS__AViWvCxCg9G1KSiXTbzPPZKB9AemyNc-aLPxXaVPqMY03YtYfkVHv_YGAU-2GJPrZ_BEhuiqNw6nz_fpfsitlaNsGKYJjdNGiRJbvTG8Ub-ZCVjr2VOnyW8Aghvv5CgJeEvPA0K9OwrCb4q5J9CWtf560d' },
-    { name: 'Dev John', role: 'Administrator', class: 'Staff', group: 'Engineering', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBjC-hxQ5DIJKaejVVgeUP2qNUJ0AhqLhsHB4dCv7O60SPE61OLJI9JldrgobVu8fBDrZufw_Sj9Q326GKSJbeo1xncAOWLmeei1V5oYVrEgFVgRKSxx7ItJHvxzarsGhKekEOx2dH7bRaOgh3dwQ_ct8EkCqKQWTiAp9O7V7ApEKF5gj_srDIu_ufRZ2PZzECAFZ1Jl4GoYEGaYCSi1Mz-aTPLKfNaPSW0sJu-pIaib6eC_vQIWm6vTHh1IBQuhPI9hhtj42nhus-0' },
-    { name: 'Support Emma', role: 'Support', class: 'Staff', group: 'Community', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBHDasXk9Y5tTv4TN9qnC-6TiofwhEdN1rJ7MAVanqHFf_eZ5Sc6xbHwSxp2hHWD-UJyxfIPymN-A3tlB6QQ3zlKht57Bn0uv-ozCl-L7xKZwUryQvldeKfFQCOQckASX-dMMnSVXxZ00a8J8zE0cnw-jyItN8ym-THlZEZqW0R2_61HM0Vc5I67Y7CNkVdhWvbVTXYYsxYvvgokBAa6X7fr6fDLfxVKBaoRyd0c5eC0VOBJT-hNS3up2jkLV2W07N1V2eBte3EHXjz' },
-    { name: 'Mod Kevin', role: 'Moderator', class: 'Staff', group: 'Moderation', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCiUpNMiB2cxltQ6UGv7IqSVQ6BRpb5flOBbjOeHtyOXaY6-5G_xDMtIPSt2eUccClBWGvKpgrDqOvbNsvIwLdjFEwZQcPSSJQArFeOiBhVEBbwVZnrgI4xhokHRzSsnIPu_-qpTqY1kaHUQ21fKgA0-OmZp3tXLfvvU0VHFkIFY3Q_rhUTA3_kzl5gnes0N5zhR7Z_A5uIZsCxnjO7tefVOXsEgsnibF7w7PM6g3mGFI3vyKU05ic0IF1Fx9S2tmk9PCO9zUt8m0iy' },
-    // 3 new Unassigned
-    { name: 'Newbie Bob', role: 'User', class: '', group: '', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBjC-hxQ5DIJKaejVVgeUP2qNUJ0AhqLhsHB4dCv7O60SPE61OLJI9JldrgobVu8fBDrZufw_Sj9Q326GKSJbeo1xncAOWLmeei1V5oYVrEgFVgRKSxx7ItJHvxzarsGhKekEOx2dH7bRaOgh3dwQ_ct8EkCqKQWTiAp9O7V7ApEKF5gj_srDIu_ufRZ2PZzECAFZ1Jl4GoYEGaYCSi1Mz-aTPLKfNaPSW0sJu-pIaib6eC_vQIWm6vTHh1IBQuhPI9hhtj42nhus-0' },
-    { name: 'Guest Alice', role: 'User', class: '', group: '', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBHDasXk9Y5tTv4TN9qnC-6TiofwhEdN1rJ7MAVanqHFf_eZ5Sc6xbHwSxp2hHWD-UJyxfIPymN-A3tlB6QQ3zlKht57Bn0uv-ozCl-L7xKZwUryQvldeKfFQCOQckASX-dMMnSVXxZ00a8J8zE0cnw-jyItN8ym-THlZEZqW0R2_61HM0Vc5I67Y7CNkVdhWvbVTXYYsxYvvgokBAa6X7fr6fDLfxVKBaoRyd0c5eC0VOBJT-hNS3up2jkLV2W07N1V2eBte3EHXjz' },
-    { name: 'Unknown User 1', role: 'User', class: '', group: '', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCiUpNMiB2cxltQ6UGv7IqSVQ6BRpb5flOBbjOeHtyOXaY6-5G_xDMtIPSt2eUccClBWGvKpgrDqOvbNsvIwLdjFEwZQcPSSJQArFeOiBhVEBbwVZnrgI4xhokHRzSsnIPu_-qpTqY1kaHUQ21fKgA0-OmZp3tXLfvvU0VHFkIFY3Q_rhUTA3_kzl5gnes0N5zhR7Z_A5uIZsCxnjO7tefVOXsEgsnibF7w7PM6g3mGFI3vyKU05ic0IF1Fx9S2tmk9PCO9zUt8m0iy' }
-  ];
-
-  const [users, setUsers] = useState(initialMockUsers);
+  const [users, setUsers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [openGroupSections, setOpenGroupSections] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    const token = localStorage.getItem('auth_token');
+    if (!token) {
+      navigate('/');
+      return;
+    }
+    
+    fetch('https://api.questcity.cloud/myhamsteracademia/api/users', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.error) {
+          console.error(data.error);
+        } else {
+          const mappedUsers = data.map((u: any) => ({
+            _id: u._id,
+            discordId: u.discordId,
+            name: u.username,
+            role: u.role,
+            class: u.class || '',
+            group: u.group || '',
+            discriminator: u.discriminator,
+            avatar: u.avatar,
+            img: u.avatar 
+              ? `https://cdn.discordapp.com/avatars/${u.discordId}/${u.avatar}.png` 
+              : `https://cdn.discordapp.com/embed/avatars/${parseInt(u.discriminator || '0') % 5}.png`
+          }));
+          setUsers(mappedUsers);
+        }
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setLoading(false);
+      });
+  }, [navigate]);
 
   const toggleSection = (section: string) => {
     setOpenSections(prev => ({ ...prev, [section]: !prev[section as keyof typeof openSections] }));
@@ -223,10 +225,32 @@ function Admin() {
     e.dataTransfer.setData('userName', userName);
   };
 
-  const handleDrop = (e: any, targetGroup: string) => {
+  const handleDrop = async (e: any, targetGroup: string) => {
     e.preventDefault();
     const userName = e.dataTransfer.getData('userName');
-    setUsers(prev => prev.map(u => u.name === userName ? { ...u, group: targetGroup === 'Ungrouped' ? '' : targetGroup } : u));
+    const userToUpdate = users.find(u => u.name === userName);
+    
+    if (!userToUpdate) return;
+    
+    const newGroup = targetGroup === 'Ungrouped' ? '' : targetGroup;
+    
+    // Optimistic UI Update
+    setUsers(prev => prev.map(u => u.name === userName ? { ...u, group: newGroup } : u));
+    
+    // Backend Update
+    try {
+      const token = localStorage.getItem('auth_token');
+      await fetch(`https://api.questcity.cloud/myhamsteracademia/api/users/${userToUpdate._id}/group`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ group: newGroup })
+      });
+    } catch (err) {
+      console.error('Failed to update group:', err);
+    }
   };
 
   const handleDragOver = (e: any) => {
@@ -276,12 +300,12 @@ function Admin() {
         if (!acc[g]) acc[g] = [];
         acc[g].push(user);
         return acc;
-      }, {} as Record<string, typeof initialMockUsers>);
+      }, {} as Record<string, any[]>);
 
       const groups = Object.keys(grouped).filter(g => g !== 'Ungrouped').sort();
       const ungrouped = grouped['Ungrouped'] || [];
 
-      const renderGroupFoldout = (groupName: string, groupUsers: typeof initialMockUsers) => {
+      const renderGroupFoldout = (groupName: string, groupUsers: any[]) => {
         const groupKey = `${className}-${groupName}`;
         const isGroupOpen = openGroupSections[groupKey] !== false; // default true
 
@@ -368,6 +392,14 @@ function Admin() {
       </div>
     );
   };
+
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', backgroundColor: '#36393f', color: '#e0e2ea', fontFamily: '"Inter", sans-serif', fontSize: '16px' }}>
+        Loading users...
+      </div>
+    );
+  }
 
   return (
     <div style={{ backgroundColor: '#36393f', minHeight: '100vh', width: '100%', color: '#e0e2ea', fontFamily: '"Inter", sans-serif', paddingBottom: '80px', boxSizing: 'border-box', overflowY: 'auto' }}>
