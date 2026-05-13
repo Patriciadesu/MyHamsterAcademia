@@ -159,10 +159,10 @@ function Admin() {
     Unassigned: true
   });
   const [groupView, setGroupView] = useState({
-    Starway: false,
-    NSC: false,
-    Staff: false,
-    Unassigned: false
+    Starway: true,
+    NSC: true,
+    Staff: true,
+    Unassigned: true
   });
 
   const [users, setUsers] = useState<any[]>([]);
@@ -221,7 +221,8 @@ function Admin() {
     setOpenGroupSections(prev => ({ ...prev, [groupKey]: prev[groupKey] === undefined ? false : !prev[groupKey] }));
   };
 
-  const handleDragStart = (e: any, userName: string) => {
+  const handleDragStart = (e: any, userId: string, userName: string) => {
+    e.dataTransfer.setData('userId', userId);
     e.dataTransfer.setData('userName', userName);
   };
 
@@ -253,6 +254,31 @@ function Admin() {
     }
   };
 
+  const handleDropClass = async (e: any, targetClass: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const userId = e.dataTransfer.getData('userId');
+    const userName = e.dataTransfer.getData('userName');
+    if (!userId) return;
+
+    const newClass = targetClass === 'Unassigned' ? '' : targetClass;
+
+    // Optimistic UI update
+    setUsers(prev => prev.map(u => u._id === userId ? { ...u, class: newClass } : u));
+
+    // Persist to backend
+    try {
+      const token = localStorage.getItem('auth_token');
+      await fetch(`https://api.questcity.cloud/myhamsteracademia/api/users/${userId}/class`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ class: newClass })
+      });
+    } catch (err) {
+      console.error('Failed to update class for', userName, err);
+    }
+  };
+
   const handleDragOver = (e: any) => {
     e.preventDefault();
   };
@@ -261,7 +287,7 @@ function Admin() {
     <div 
       key={i} 
       draggable
-      onDragStart={(e) => handleDragStart(e, u.name)}
+      onDragStart={(e) => handleDragStart(e, u._id, u.name)}
       style={{ backgroundColor: '#272a30', border: '1px solid rgba(68, 70, 81, 0.3)', borderRadius: '12px', padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'grab', transition: 'background-color 0.2s', userSelect: 'none' }} 
       onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#32353b'} 
       onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#272a30'}
@@ -356,6 +382,8 @@ function Admin() {
       <div style={{ backgroundColor: '#191c21', borderRadius: '12px', overflow: 'hidden', border: '1px solid #272a30' }}>
         <button 
           onClick={() => toggleSection(className)}
+          onDragOver={handleDragOver}
+          onDrop={(e) => handleDropClass(e, className)}
           style={{ width: '100%', padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#1d2025', border: 'none', cursor: 'pointer', outline: 'none' }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>

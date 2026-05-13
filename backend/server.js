@@ -200,6 +200,22 @@ app.put('/api/users/:id/group', requireAdmin, async (req, res) => {
   }
 });
 
+app.put('/api/users/:id/class', requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { class: newClass } = req.body;
+
+    const user = await User.findById(id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    user.class = newClass || undefined;
+    await user.save();
+    res.json({ success: true, user });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update class' });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Backend server running on port ${PORT}`);
 });
