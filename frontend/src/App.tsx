@@ -153,6 +153,7 @@ function Admin() {
   const navigate = useNavigate();
   const [selectedClass, setSelectedClass] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   // Sample data to match the design (pending real database integration)
   const mockUsers = [
@@ -179,11 +180,11 @@ function Admin() {
         </div>
       </header>
 
-      <main style={{ maxWidth: '800px', margin: '0 auto', padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+      <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
         
         {/* Controls */}
-        <section style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <div style={{ position: 'relative' }}>
+        <section style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
+          <div style={{ flex: '1 1 300px', position: 'relative' }}>
             <input 
               type="text" 
               placeholder="Search for users..." 
@@ -192,17 +193,41 @@ function Admin() {
               style={{ width: '100%', height: '48px', padding: '0 16px', backgroundColor: '#191c21', border: '1px solid #191c21', borderRadius: '8px', color: '#e0e2ea', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }}
             />
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            <label style={{ fontSize: '12px', fontWeight: 600, color: '#c5c5d3', paddingLeft: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Class</label>
-            <select 
-              value={selectedClass}
-              onChange={(e) => setSelectedClass(e.target.value)}
-              style={{ height: '48px', padding: '0 16px', backgroundColor: '#191c21', border: 'none', borderRadius: '8px', color: '#e0e2ea', fontSize: '14px', outline: 'none', cursor: 'pointer', appearance: 'none' }}
+          <div style={{ flex: '1 1 300px', backgroundColor: '#191c21', borderRadius: '8px', overflow: 'hidden' }}>
+            <button 
+              onClick={() => setIsFilterOpen(!isFilterOpen)}
+              style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', backgroundColor: 'transparent', border: 'none', color: '#e0e2ea', fontSize: '14px', fontWeight: 600, cursor: 'pointer', outline: 'none' }}
             >
-              <option value="">All Classes</option>
-              <option value="Starway">Starway</option>
-              <option value="NSC">NSC</option>
-            </select>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <span style={{ fontSize: '12px', color: '#c5c5d3', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Class Filter</span>
+                <span style={{ backgroundColor: 'rgba(118, 141, 222, 0.2)', color: '#b6c4ff', padding: '2px 8px', borderRadius: '12px', fontSize: '11px' }}>{selectedClass || 'All Classes'}</span>
+              </div>
+              <span style={{ transform: isFilterOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', fontSize: '12px' }}>▼</span>
+            </button>
+            
+            {isFilterOpen && (
+              <div style={{ padding: '0 16px 16px 16px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                {['All Classes', 'Starway', 'NSC'].map(cls => (
+                  <button
+                    key={cls}
+                    onClick={() => setSelectedClass(cls === 'All Classes' ? '' : cls)}
+                    style={{
+                      padding: '8px 16px',
+                      backgroundColor: (selectedClass === cls || (selectedClass === '' && cls === 'All Classes')) ? '#768dde' : '#272a30',
+                      color: (selectedClass === cls || (selectedClass === '' && cls === 'All Classes')) ? '#00226e' : '#e0e2ea',
+                      border: 'none',
+                      borderRadius: '20px',
+                      fontSize: '13px',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      transition: 'background-color 0.2s'
+                    }}
+                  >
+                    {cls}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </section>
 
@@ -213,16 +238,16 @@ function Admin() {
         </div>
 
         {/* User List */}
-        <section style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
           {filteredUsers.map((u, i) => (
             <div key={i} style={{ backgroundColor: '#1d2025', border: '1px solid rgba(68, 70, 81, 0.5)', borderRadius: '12px', padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', transition: 'background-color 0.2s' }} onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#32353b'} onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#1d2025'}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <div style={{ width: '48px', height: '48px', borderRadius: '8px', overflow: 'hidden', backgroundColor: '#191c21' }}>
+                <div style={{ width: '48px', height: '48px', borderRadius: '8px', overflow: 'hidden', backgroundColor: '#191c21', flexShrink: 0 }}>
                   <img src={u.img} alt={u.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <span style={{ fontSize: '16px', fontWeight: 700, color: '#e0e2ea' }}>{u.name}</span>
-                  <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                  <span style={{ fontSize: '16px', fontWeight: 700, color: '#e0e2ea', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{u.name}</span>
+                  <div style={{ display: 'flex', gap: '8px', marginTop: '4px', flexWrap: 'wrap' }}>
                     <span style={{ fontSize: '11px', fontWeight: 500, backgroundColor: '#32353b', color: '#c5c5d3', padding: '2px 8px', borderRadius: '4px' }}>{u.role}</span>
                     <span style={{ fontSize: '11px', fontWeight: 500, color: u.class === 'Starway' ? '#b6c4ff' : '#eac24b', backgroundColor: 'rgba(255,255,255,0.05)', padding: '2px 8px', borderRadius: '4px' }}>{u.class}</span>
                   </div>
@@ -230,10 +255,10 @@ function Admin() {
               </div>
             </div>
           ))}
-          {filteredUsers.length === 0 && (
-             <div style={{ textAlign: 'center', padding: '40px 0', color: '#8f909c' }}>No users match the criteria.</div>
-          )}
         </section>
+        {filteredUsers.length === 0 && (
+          <div style={{ textAlign: 'center', padding: '40px 0', color: '#8f909c', gridColumn: '1 / -1' }}>No users match the criteria.</div>
+        )}
 
         {/* Actions */}
         <button 
