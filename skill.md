@@ -187,3 +187,11 @@
 - Displays position with ordinal suffix (e.g., 1st, 2nd, 3rd) and the group name.
 - If the group has no randomized queue position or the user is unassigned, it displays "—".
 - Uses a premium glassmorphism style consistent with the user banner.
+
+## Commit: Implement Show Manager tab with class selection and Start button
+- Replaced the "Show Manager" placeholder in the Admin panel with a functional class selector.
+- Added showManagerClass state to track the selected class in the Show Manager tab.
+- Implemented three class buttons (Staff, Starway, NSC) with teal accents.
+- Added a large circular "START" button that glows green when a class is selected.
+- The Start button currently logs to the console and acts as a placeholder for future game-starting logic.
+- Disabled the Start button and dimmed its appearance when no class is selected.

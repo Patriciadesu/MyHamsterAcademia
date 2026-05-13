@@ -178,6 +178,7 @@ function Admin() {
   const [randomQueues, setRandomQueues] = useState<any[]>([]);
   const [randomizing, setRandomizing] = useState(false);
   const [selectedClass, setSelectedClass] = useState<string>('');
+  const [showManagerClass, setShowManagerClass] = useState<string>('');
 
   useEffect(() => {
     const token = localStorage.getItem('auth_token');
@@ -617,10 +618,59 @@ function Admin() {
         )}
 
         {activeTab === 'ShowManager' && (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '400px', color: '#8f909c', gap: '16px' }}>
-            <span style={{ fontSize: '48px' }}>🎬</span>
-            <h2 style={{ margin: 0, fontSize: '22px', fontWeight: 700, color: '#e0e2ea' }}>Show Manager</h2>
-            <p style={{ margin: 0, fontSize: '14px' }}>Coming soon...</p>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '36px', minHeight: '400px', paddingTop: '40px' }}>
+            {/* Class selector */}
+            <div style={{ display: 'flex', gap: '12px' }}>
+              {(['Staff', 'Starway', 'NSC'] as const).map(cls => (
+                <button
+                  key={cls}
+                  onClick={() => setShowManagerClass(cls)}
+                  style={{
+                    padding: '10px 28px', borderRadius: '10px', border: '2px solid',
+                    borderColor: showManagerClass === cls ? '#57c4a0' : '#444651',
+                    backgroundColor: showManagerClass === cls ? 'rgba(87, 196, 160, 0.15)' : '#1d2025',
+                    color: showManagerClass === cls ? '#57c4a0' : '#8f909c',
+                    fontSize: '15px', fontWeight: 700, cursor: 'pointer', transition: 'all 0.15s'
+                  }}
+                >
+                  {cls}
+                </button>
+              ))}
+            </div>
+
+            {/* Big green button */}
+            <button
+              onClick={() => {
+                if (!showManagerClass) return;
+                console.log(`Starting game for ${showManagerClass}`);
+              }}
+              disabled={!showManagerClass}
+              style={{
+                width: '200px', height: '200px', borderRadius: '50%',
+                background: (!showManagerClass)
+                  ? 'radial-gradient(circle at 40% 35%, #555, #333)'
+                  : 'radial-gradient(circle at 40% 35%, #57c4a0, #2d6b57)',
+                border: '6px solid rgba(87, 196, 160, 0.3)',
+                boxShadow: !showManagerClass
+                  ? 'none'
+                  : '0 0 60px rgba(87, 196, 160, 0.5), 0 20px 40px rgba(0,0,0,0.5), inset 0 -8px 0 rgba(0,0,0,0.4)',
+                cursor: !showManagerClass ? 'not-allowed' : 'pointer',
+                fontSize: '24px', fontWeight: 900, color: '#fff',
+                letterSpacing: '2px', textTransform: 'uppercase',
+                transition: 'all 0.15s',
+                opacity: !showManagerClass ? 0.4 : 1,
+              }}
+            >
+              START
+            </button>
+
+            {!showManagerClass && (
+              <p style={{ margin: 0, color: '#8f909c', fontSize: '14px' }}>Select a class above first</p>
+            )}
+            
+            {showManagerClass && (
+              <p style={{ margin: 0, color: '#57c4a0', fontSize: '14px', fontWeight: 600 }}>Ready to start {showManagerClass} show</p>
+            )}
           </div>
         )}
 
