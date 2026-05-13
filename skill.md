@@ -10,3 +10,8 @@
 - Added Express and CORS backend server.
 - Connected React frontend to fetch data from backend.
 - Created root package.json with concurrently to run both.
+
+## Commit: Create Log in with discord page
+- Replaced frontend UI with a Discord login page styling.
+- Added Discord SVG logo and brand colors.
+- Implemented "Log in with Discord" button.
