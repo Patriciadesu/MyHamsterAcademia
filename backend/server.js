@@ -227,49 +227,49 @@ app.get('/api/groups', requireAdmin, async (req, res) => {
   }
 });
 
-// Randomize queue for every group derived from User.group field
-app.post('/api/groups/randomize-all', requireAdmin, async (req, res) => {
+// Randomize group ORDER for a specific class (which group goes first, not users within group)
+app.post('/api/groups/randomize-class', requireAdmin, async (req, res) => {
   try {
-    // Get all users that have a group assigned
-    const usersWithGroup = await User.find({ group: { $exists: true, $ne: '' } });
+    const { class: targetClass } = req.body;
+    if (!targetClass) return res.status(400).json({ error: 'class is required' });
 
-    // Bucket users by group name
-    const buckets = {};
-    for (const user of usersWithGroup) {
-      const g = user.group;
-      if (!buckets[g]) buckets[g] = [];
-      buckets[g].push(user);
+    // Get all users in this class that have a group assigned
+    const usersInClass = await User.find({
+      class: targetClass,
+      group: { $exists: true, $ne: '' }
+    });
+
+    if (usersInClass.length === 0) {
+      return res.json({ class: targetClass, queue: [] });
     }
 
-    const results = [];
-    for (const [groupName, members] of Object.entries(buckets)) {
-      // Fisher-Yates shuffle
-      const shuffled = [...members];
-      for (let i = shuffled.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-      }
+    // Collect distinct group names
+    const groupNamesSet = new Set();
+    for (const user of usersInClass) {
+      groupNamesSet.add(user.group);
+    }
+    const groupNames = Array.from(groupNamesSet);
 
-      // Upsert the Group document
-      const group = await Group.findOneAndUpdate(
-        { name: groupName },
-        {
-          name: groupName,
-          class: members[0].class,
-          users: members.map(u => u._id),
-          queue: shuffled.map(u => u._id),
-          lastRandomized: new Date(),
-        },
-        { upsert: true, new: true }
-      ).populate('queue', 'username avatar discordId discriminator');
-
-      results.push(group);
+    // Fisher-Yates shuffle the GROUP names (group order)
+    for (let i = groupNames.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [groupNames[i], groupNames[j]] = [groupNames[j], groupNames[i]];
     }
 
-    res.json(results);
+    // Build result: ordered list of groups with their member count
+    const result = groupNames.map((name, idx) => {
+      const members = usersInClass.filter(u => u.group === name);
+      return {
+        position: idx + 1,
+        name,
+        memberCount: members.length,
+      };
+    });
+
+    res.json({ class: targetClass, queue: result });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Failed to randomize queues' });
+    res.status(500).json({ error: 'Failed to randomize class queue' });
   }
 });
 

@@ -165,6 +165,7 @@ function Admin() {
   const [openGroupSections, setOpenGroupSections] = useState<Record<string, boolean>>({});
   const [randomQueues, setRandomQueues] = useState<any[]>([]);
   const [randomizing, setRandomizing] = useState(false);
+  const [selectedClass, setSelectedClass] = useState<string>('');
 
   useEffect(() => {
     const token = localStorage.getItem('auth_token');
@@ -474,76 +475,116 @@ function Admin() {
         )}
 
         {activeTab === 'RandomQueue' && (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '40px', minHeight: '400px', paddingTop: '40px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '36px', minHeight: '400px', paddingTop: '40px' }}>
+
+            {/* Class selector */}
+            <div style={{ display: 'flex', gap: '12px' }}>
+              {(['Staff', 'Starway', 'NSC'] as const).map(cls => (
+                <button
+                  key={cls}
+                  onClick={() => { setSelectedClass(cls); setRandomQueues([]); }}
+                  style={{
+                    padding: '10px 28px', borderRadius: '10px', border: '2px solid',
+                    borderColor: selectedClass === cls ? '#768dde' : '#444651',
+                    backgroundColor: selectedClass === cls ? 'rgba(118,141,222,0.15)' : '#1d2025',
+                    color: selectedClass === cls ? '#768dde' : '#8f909c',
+                    fontSize: '15px', fontWeight: 700, cursor: 'pointer', transition: 'all 0.15s'
+                  }}
+                >
+                  {cls}
+                </button>
+              ))}
+            </div>
 
             {/* Big red button */}
             <button
               onClick={async () => {
+                if (!selectedClass) return;
                 setRandomizing(true);
                 try {
                   const token = localStorage.getItem('auth_token');
-                  const res = await fetch('https://api.questcity.cloud/myhamsteracademia/api/groups/randomize-all', {
+                  const res = await fetch('https://api.questcity.cloud/myhamsteracademia/api/groups/randomize-class', {
                     method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ class: selectedClass })
                   });
                   const data = await res.json();
-                  setRandomQueues(Array.isArray(data) ? data : []);
+                  setRandomQueues(data.queue || []);
                 } catch (err) {
                   console.error(err);
                 } finally {
                   setRandomizing(false);
                 }
               }}
-              disabled={randomizing}
+              disabled={randomizing || !selectedClass}
               style={{
                 width: '200px', height: '200px', borderRadius: '50%',
-                background: randomizing
-                  ? 'radial-gradient(circle at 40% 35%, #c0392b, #7b241c)'
-                  : 'radial-gradient(circle at 40% 35%, #ff4444, #c0392b)',
+                background: (!selectedClass)
+                  ? 'radial-gradient(circle at 40% 35%, #555, #333)'
+                  : randomizing
+                    ? 'radial-gradient(circle at 40% 35%, #c0392b, #7b241c)'
+                    : 'radial-gradient(circle at 40% 35%, #ff4444, #c0392b)',
                 border: '6px solid rgba(255,100,100,0.3)',
-                boxShadow: randomizing
-                  ? '0 0 30px rgba(255,68,68,0.3), inset 0 -6px 0 rgba(0,0,0,0.4)'
-                  : '0 0 60px rgba(255,68,68,0.5), 0 20px 40px rgba(0,0,0,0.5), inset 0 -8px 0 rgba(0,0,0,0.4)',
-                cursor: randomizing ? 'wait' : 'pointer',
+                boxShadow: !selectedClass
+                  ? 'none'
+                  : randomizing
+                    ? '0 0 30px rgba(255,68,68,0.3), inset 0 -6px 0 rgba(0,0,0,0.4)'
+                    : '0 0 60px rgba(255,68,68,0.5), 0 20px 40px rgba(0,0,0,0.5), inset 0 -8px 0 rgba(0,0,0,0.4)',
+                cursor: (!selectedClass || randomizing) ? 'not-allowed' : 'pointer',
                 fontSize: '18px', fontWeight: 900, color: '#fff',
                 letterSpacing: '1px', textTransform: 'uppercase',
                 transition: 'all 0.15s',
                 transform: randomizing ? 'scale(0.95) translateY(4px)' : 'scale(1)',
+                opacity: !selectedClass ? 0.4 : 1,
               }}
             >
               {randomizing ? '...' : '🎲 RANDOM'}
             </button>
 
-            {/* Results */}
+            {!selectedClass && (
+              <p style={{ margin: 0, color: '#8f909c', fontSize: '14px' }}>Select a class above first</p>
+            )}
+
+            {/* Results — group ORDER */}
             {randomQueues.length > 0 && (
-              <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                <h2 style={{ margin: 0, textAlign: 'center', fontSize: '18px', fontWeight: 700, color: '#e0e2ea' }}>Queue Results</h2>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
-                  {randomQueues.map((group: any) => (
-                    <div key={group._id} style={{ backgroundColor: '#1d2025', borderRadius: '12px', overflow: 'hidden', border: '1px solid #272a30' }}>
-                      <div style={{ padding: '14px 18px', backgroundColor: '#23262b', borderBottom: '1px solid #272a30' }}>
-                        <span style={{ fontSize: '15px', fontWeight: 700, color: '#e0e2ea' }}>Group {group.name}</span>
-                        <span style={{ marginLeft: '8px', fontSize: '11px', color: '#8f909c', backgroundColor: '#191c21', padding: '2px 8px', borderRadius: '10px' }}>{group.queue?.length ?? 0} members</span>
+              <div style={{ width: '100%', maxWidth: '500px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <h2 style={{ margin: 0, textAlign: 'center', fontSize: '18px', fontWeight: 700, color: '#e0e2ea' }}>
+                  {selectedClass} — Group Queue
+                </h2>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  {randomQueues.map((item: any) => {
+                    const isFirst = item.position === 1;
+                    const medals: Record<number, string> = { 1: '🥇', 2: '🥈', 3: '🥉' };
+                    return (
+                      <div
+                        key={item.name}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: '16px',
+                          padding: '14px 20px', borderRadius: '10px',
+                          backgroundColor: isFirst ? 'rgba(118,141,222,0.12)' : '#1d2025',
+                          border: `1px solid ${isFirst ? 'rgba(118,141,222,0.4)' : '#272a30'}`,
+                          transition: 'all 0.2s',
+                        }}
+                      >
+                        <span style={{ fontSize: '28px', minWidth: '36px', textAlign: 'center' }}>
+                          {medals[item.position] || `#${item.position}`}
+                        </span>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontSize: '18px', fontWeight: 700, color: isFirst ? '#768dde' : '#e0e2ea' }}>
+                            Group {item.name}
+                          </div>
+                          <div style={{ fontSize: '12px', color: '#8f909c', marginTop: '2px' }}>
+                            {item.memberCount} member{item.memberCount !== 1 ? 's' : ''}
+                          </div>
+                        </div>
+                        {isFirst && (
+                          <span style={{ fontSize: '13px', fontWeight: 700, color: '#768dde', backgroundColor: 'rgba(118,141,222,0.2)', padding: '4px 12px', borderRadius: '20px' }}>
+                            GOES FIRST
+                          </span>
+                        )}
                       </div>
-                      <div style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        {(group.queue || []).map((u: any, idx: number) => {
-                          const avatarUrl = u.avatar
-                            ? `https://cdn.discordapp.com/avatars/${u.discordId}/${u.avatar}.png`
-                            : `https://cdn.discordapp.com/embed/avatars/${parseInt(u.discriminator || '0') % 5}.png`;
-                          return (
-                            <div key={u._id} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '8px 10px', borderRadius: '8px', backgroundColor: idx === 0 ? 'rgba(118,141,222,0.15)' : '#191c21', border: idx === 0 ? '1px solid rgba(118,141,222,0.3)' : '1px solid transparent' }}>
-                              <span style={{ fontSize: '13px', fontWeight: 700, color: idx === 0 ? '#768dde' : '#8f909c', minWidth: '20px' }}>#{idx + 1}</span>
-                              <div style={{ width: '32px', height: '32px', borderRadius: '50%', overflow: 'hidden', flexShrink: 0 }}>
-                                <img src={avatarUrl} alt={u.username} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                              </div>
-                              <span style={{ fontSize: '14px', fontWeight: 600, color: '#e0e2ea' }}>{u.username}</span>
-                              {idx === 0 && <span style={{ marginLeft: 'auto', fontSize: '11px', color: '#768dde' }}>FIRST</span>}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             )}

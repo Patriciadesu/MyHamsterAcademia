@@ -153,3 +153,12 @@
 - Replaced Random Queue placeholder with a large red meme-style circular button in the center.
 - Clicking the button calls randomize-all and displays each group's shuffled queue as numbered cards.
 - First place in each group is highlighted with a blue accent and a "FIRST" label.
+
+## Commit: Fix Random Queue to show group order, add class selector
+- Corrected Random Queue: the queue now shows which GROUP goes first within a class, not which person in a group.
+- Replaced randomize-all endpoint with POST /api/groups/randomize-class accepting { class } in request body.
+- Backend collects distinct group names for the selected class, shuffles them (Fisher-Yates), and returns ordered list with position and member count.
+- Added three class selector buttons (Staff, Starway, NSC) above the red button; must select one before randomizing.
+- Red button is greyed out and disabled when no class is selected.
+- Results display a vertical numbered list: 🥇🥈🥉 medals for top 3, "GOES FIRST" badge on position 1.
+- Selecting a new class clears the previous result.
