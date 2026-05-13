@@ -151,9 +151,11 @@ function Main() {
 
 function Admin() {
   const navigate = useNavigate();
-  const [selectedClass, setSelectedClass] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [openSections, setOpenSections] = useState({
+    Starway: true,
+    NSC: true
+  });
 
   // Sample data to match the design (pending real database integration)
   const mockUsers = [
@@ -163,10 +165,56 @@ function Admin() {
     { name: 'Marcus Thorne', role: 'User', class: 'NSC', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCiUpNMiB2cxltQ6UGv7IqSVQ6BRpb5flOBbjOeHtyOXaY6-5G_xDMtIPSt2eUccClBWGvKpgrDqOvbNsvIwLdjFEwZQcPSSJQArFeOiBhVEBbwVZnrgI4xhokHRzSsnIPu_-qpTqY1kaHUQ21fKgA0-OmZp3tXLfvvU0VHFkIFY3Q_rhUTA3_kzl5gnes0N5zhR7Z_A5uIZsCxnjO7tefVOXsEgsnibF7w7PM6g3mGFI3vyKU05ic0IF1Fx9S2tmk9PCO9zUt8m0iy' }
   ];
 
-  const filteredUsers = mockUsers.filter(u => 
-    (selectedClass === '' || selectedClass === 'All Classes' || u.class === selectedClass) &&
-    u.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const toggleSection = (section: string) => {
+    setOpenSections(prev => ({ ...prev, [section]: !prev[section as keyof typeof openSections] }));
+  };
+
+  const renderClassSection = (className: string) => {
+    const usersInClass = mockUsers.filter(u => u.class === className && u.name.toLowerCase().includes(searchQuery.toLowerCase()));
+    const isOpen = openSections[className as keyof typeof openSections];
+
+    return (
+      <div style={{ backgroundColor: '#191c21', borderRadius: '12px', overflow: 'hidden', border: '1px solid #272a30' }}>
+        <button 
+          onClick={() => toggleSection(className)}
+          style={{ width: '100%', padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#1d2025', border: 'none', cursor: 'pointer', outline: 'none' }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <h2 style={{ fontSize: '20px', fontWeight: 700, margin: 0, color: '#e0e2ea' }}>{className}</h2>
+            <span style={{ fontSize: '12px', fontWeight: 600, color: '#b6c4ff', backgroundColor: 'rgba(118, 141, 222, 0.2)', padding: '4px 8px', borderRadius: '4px' }}>{usersInClass.length} Users</span>
+          </div>
+          <span style={{ transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', fontSize: '16px', color: '#c5c5d3' }}>▼</span>
+        </button>
+
+        {isOpen && (
+          <div style={{ padding: '20px', backgroundColor: '#191c21' }}>
+            {usersInClass.length > 0 ? (
+              <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
+                {usersInClass.map((u, i) => (
+                  <div key={i} style={{ backgroundColor: '#272a30', border: '1px solid rgba(68, 70, 81, 0.3)', borderRadius: '12px', padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', transition: 'background-color 0.2s' }} onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#32353b'} onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#272a30'}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                      <div style={{ width: '48px', height: '48px', borderRadius: '8px', overflow: 'hidden', backgroundColor: '#1d2025', flexShrink: 0 }}>
+                        <img src={u.img} alt={u.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                        <span style={{ fontSize: '16px', fontWeight: 700, color: '#e0e2ea', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{u.name}</span>
+                        <div style={{ display: 'flex', gap: '8px', marginTop: '4px', flexWrap: 'wrap' }}>
+                          <span style={{ fontSize: '11px', fontWeight: 500, backgroundColor: '#1d2025', color: '#c5c5d3', padding: '2px 8px', borderRadius: '4px' }}>{u.role}</span>
+                          <span style={{ fontSize: '11px', fontWeight: 500, color: u.class === 'Starway' ? '#b6c4ff' : '#eac24b', backgroundColor: 'rgba(255,255,255,0.05)', padding: '2px 8px', borderRadius: '4px' }}>{u.class}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </section>
+            ) : (
+              <div style={{ textAlign: 'center', padding: '20px 0', color: '#8f909c' }}>No users match the criteria.</div>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div style={{ backgroundColor: '#36393f', minHeight: '100vh', width: '100%', color: '#e0e2ea', fontFamily: '"Inter", sans-serif', paddingBottom: '80px', boxSizing: 'border-box', overflowY: 'auto' }}>
@@ -184,7 +232,7 @@ function Admin() {
         
         {/* Controls */}
         <section style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
-          <div style={{ flex: '1 1 300px', position: 'relative' }}>
+          <div style={{ flex: '1 1 100%', position: 'relative' }}>
             <input 
               type="text" 
               placeholder="Search for users..." 
@@ -193,72 +241,13 @@ function Admin() {
               style={{ width: '100%', height: '48px', padding: '0 16px', backgroundColor: '#191c21', border: '1px solid #191c21', borderRadius: '8px', color: '#e0e2ea', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }}
             />
           </div>
-          <div style={{ flex: '1 1 300px', backgroundColor: '#191c21', borderRadius: '8px', overflow: 'hidden' }}>
-            <button 
-              onClick={() => setIsFilterOpen(!isFilterOpen)}
-              style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', backgroundColor: 'transparent', border: 'none', color: '#e0e2ea', fontSize: '14px', fontWeight: 600, cursor: 'pointer', outline: 'none' }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <span style={{ fontSize: '12px', color: '#c5c5d3', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Class Filter</span>
-                <span style={{ backgroundColor: 'rgba(118, 141, 222, 0.2)', color: '#b6c4ff', padding: '2px 8px', borderRadius: '12px', fontSize: '11px' }}>{selectedClass || 'All Classes'}</span>
-              </div>
-              <span style={{ transform: isFilterOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', fontSize: '12px' }}>▼</span>
-            </button>
-            
-            {isFilterOpen && (
-              <div style={{ padding: '0 16px 16px 16px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                {['All Classes', 'Starway', 'NSC'].map(cls => (
-                  <button
-                    key={cls}
-                    onClick={() => setSelectedClass(cls === 'All Classes' ? '' : cls)}
-                    style={{
-                      padding: '8px 16px',
-                      backgroundColor: (selectedClass === cls || (selectedClass === '' && cls === 'All Classes')) ? '#768dde' : '#272a30',
-                      color: (selectedClass === cls || (selectedClass === '' && cls === 'All Classes')) ? '#00226e' : '#e0e2ea',
-                      border: 'none',
-                      borderRadius: '20px',
-                      fontSize: '13px',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      transition: 'background-color 0.2s'
-                    }}
-                  >
-                    {cls}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
         </section>
 
-        {/* List Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h2 style={{ fontSize: '20px', fontWeight: 600, margin: 0, color: '#e0e2ea' }}>Active Directory</h2>
-          <span style={{ fontSize: '12px', fontWeight: 600, color: '#b6c4ff', backgroundColor: 'rgba(118, 141, 222, 0.2)', padding: '4px 8px', borderRadius: '4px' }}>{filteredUsers.length} Users</span>
-        </div>
-
-        {/* User List */}
-        <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
-          {filteredUsers.map((u, i) => (
-            <div key={i} style={{ backgroundColor: '#1d2025', border: '1px solid rgba(68, 70, 81, 0.5)', borderRadius: '12px', padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', transition: 'background-color 0.2s' }} onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#32353b'} onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#1d2025'}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <div style={{ width: '48px', height: '48px', borderRadius: '8px', overflow: 'hidden', backgroundColor: '#191c21', flexShrink: 0 }}>
-                  <img src={u.img} alt={u.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-                  <span style={{ fontSize: '16px', fontWeight: 700, color: '#e0e2ea', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{u.name}</span>
-                  <div style={{ display: 'flex', gap: '8px', marginTop: '4px', flexWrap: 'wrap' }}>
-                    <span style={{ fontSize: '11px', fontWeight: 500, backgroundColor: '#32353b', color: '#c5c5d3', padding: '2px 8px', borderRadius: '4px' }}>{u.role}</span>
-                    <span style={{ fontSize: '11px', fontWeight: 500, color: u.class === 'Starway' ? '#b6c4ff' : '#eac24b', backgroundColor: 'rgba(255,255,255,0.05)', padding: '2px 8px', borderRadius: '4px' }}>{u.class}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
+        {/* Foldout Sections */}
+        <section style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          {renderClassSection('Starway')}
+          {renderClassSection('NSC')}
         </section>
-        {filteredUsers.length === 0 && (
-          <div style={{ textAlign: 'center', padding: '40px 0', color: '#8f909c', gridColumn: '1 / -1' }}>No users match the criteria.</div>
-        )}
 
         {/* Actions */}
         <button 
