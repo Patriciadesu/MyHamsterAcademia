@@ -156,40 +156,67 @@ function Main() {
     boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
   };
 
-  const StockChart = () => {
+  const StockChart = ({ showStatus: ss }: { showStatus: any }) => {
     // Start from 500, generate initial decreasing data with some bounces
     const [priceData, setPriceData] = useState(() => {
       const data = [500];
       for (let i = 1; i < 16; i++) {
         const prev = data[i - 1];
-        // Bias downward: drop 2-8, occasionally bounce up 1-3
         const change = Math.random() < 0.75
-          ? -(Math.random() * 6 + 2)   // 75% chance: drop 2–8
-          : (Math.random() * 3 + 1);    // 25% chance: bounce 1–3
+          ? -(Math.random() * 6 + 2)
+          : (Math.random() * 3 + 1);
         data.push(Math.max(10, parseFloat((prev + change).toFixed(2))));
       }
       return data;
     });
 
+    // Check if stock is currently boosted (within last 10 seconds)
+    const boostAt = ss?.stockBoostAt ? Number(ss.stockBoostAt) : 0;
+    const [isBoosted, setIsBoosted] = useState(false);
+
+    useEffect(() => {
+      const checkBoost = () => {
+        if (boostAt > 0) {
+          const elapsed = Date.now() - boostAt;
+          setIsBoosted(elapsed < 10000); // 10 seconds of boost
+        } else {
+          setIsBoosted(false);
+        }
+      };
+      checkBoost();
+      const iv = setInterval(checkBoost, 500);
+      return () => clearInterval(iv);
+    }, [boostAt]);
+
     useEffect(() => {
       const interval = setInterval(() => {
         setPriceData(prev => {
           const last = prev[prev.length - 1];
-          // Continued downward bias with occasional small bounces
-          const change = Math.random() < 0.7
-            ? -(Math.random() * 8 + 1.5)  // drop
-            : (Math.random() * 4 + 0.5);   // bounce
+          let change: number;
+          if (isBoosted) {
+            // Boosted: strong upward movement
+            change = Math.random() < 0.85
+              ? (Math.random() * 12 + 4)    // 85% chance: rise 4–16
+              : -(Math.random() * 2 + 0.5); // 15% chance: tiny dip
+          } else {
+            // Normal: bearish trend
+            change = Math.random() < 0.7
+              ? -(Math.random() * 8 + 1.5)
+              : (Math.random() * 4 + 0.5);
+          }
           const next = Math.max(5, parseFloat((last + change).toFixed(2)));
           return [...prev.slice(1), next];
         });
       }, 1800);
       return () => clearInterval(interval);
-    }, []);
+    }, [isBoosted]);
 
     const currentPrice = priceData[priceData.length - 1];
     const pctChange = (((currentPrice - 500) / 500) * 100).toFixed(2);
+    const isUp = Number(pctChange) >= 0;
+    const accentColor = isBoosted || isUp ? '#57c4a0' : '#ed4245';
 
-    // Map price data to SVG Y coords (higher price = lower Y)
+    // Map price data to SVG Y coords
     const maxP = Math.max(...priceData);
     const minP = Math.min(...priceData);
     const range = maxP - minP || 1;
@@ -198,28 +225,28 @@ function Main() {
     return (
       <div style={{ 
         padding: '24px', backgroundColor: 'rgba(30, 33, 38, 0.6)', borderRadius: '24px', 
-        border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(16px)', 
-        width: '420px', boxShadow: '0 20px 50px rgba(0,0,0,0.3)',
-        animation: 'fadeIn 0.5s ease-out'
+        border: `1px solid ${isBoosted ? 'rgba(87, 196, 160, 0.2)' : 'rgba(255,255,255,0.08)'}`, backdropFilter: 'blur(16px)', 
+        width: '420px', boxShadow: isBoosted ? '0 20px 50px rgba(87, 196, 160, 0.15)' : '0 20px 50px rgba(0,0,0,0.3)',
+        animation: 'fadeIn 0.5s ease-out', transition: 'all 0.5s ease'
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
             <span style={{ fontSize: '12px', color: '#8f909c', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>Hamster Index</span>
             <span style={{ fontSize: '28px', fontWeight: 900, color: '#e0e2ea', display: 'flex', alignItems: 'baseline', gap: '8px' }}>
               ${currentPrice.toFixed(2)}
-              <span style={{ fontSize: '14px', color: '#ed4245', fontWeight: 700 }}>{pctChange}%</span>
+              <span style={{ fontSize: '14px', color: accentColor, fontWeight: 700, transition: 'color 0.3s' }}>{isUp ? '+' : ''}{pctChange}%</span>
             </span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: 'rgba(237, 66, 69, 0.1)', padding: '6px 12px', borderRadius: '8px' }}>
-            <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#ed4245', animation: 'pulse 1.5s infinite' }} />
-            <span style={{ color: '#ed4245', fontSize: '11px', fontWeight: 800 }}>LIVE</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: `${accentColor}18`, padding: '6px 12px', borderRadius: '8px', transition: 'all 0.3s' }}>
+            <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: accentColor, animation: 'pulse 1.5s infinite', transition: 'background-color 0.3s' }} />
+            <span style={{ color: accentColor, fontSize: '11px', fontWeight: 800, transition: 'color 0.3s' }}>{isBoosted ? '📈 RISING' : 'LIVE'}</span>
           </div>
         </div>
         <svg viewBox="0 0 360 100" style={{ width: '100%', height: '140px', overflow: 'visible' }}>
           <defs>
             <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#ed4245" stopOpacity="0.35" />
-              <stop offset="100%" stopColor="#ed4245" stopOpacity="0" />
+              <stop offset="0%" stopColor={accentColor} stopOpacity="0.35" />
+              <stop offset="100%" stopColor={accentColor} stopOpacity="0" />
             </linearGradient>
           </defs>
           <polyline
@@ -230,12 +257,12 @@ function Main() {
           />
           <polyline
             fill="none"
-            stroke="#ed4245"
+            stroke={accentColor}
             strokeWidth="3"
             strokeLinecap="round"
             strokeLinejoin="round"
             points={points}
-            style={{ filter: 'drop-shadow(0 0 12px rgba(237, 66, 69, 0.6))', transition: 'all 0.5s ease' }}
+            style={{ filter: `drop-shadow(0 0 12px ${accentColor}99)`, transition: 'all 0.5s ease' }}
           />
         </svg>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '16px' }}>
@@ -394,7 +421,7 @@ function Main() {
                  <h2 style={{ fontSize: '32px', fontWeight: 900, color: '#e0e2ea', margin: '16px 0 8px 0' }}>Group {showStatus.currentGroupName} is Live</h2>
                  <p style={{ margin: 0, color: '#8f909c', fontSize: '16px' }}>Please wait for your turn. Analyzing market trends...</p>
                </div>
-               <StockChart />
+               <StockChart showStatus={showStatus} />
             </div>
           )
         )}
@@ -412,6 +439,45 @@ function Main() {
           </div>
         )}
       </div>
+
+      {/* Judge Boost Button */}
+      {(user.role === 'judge' || user.role === 'admin') && showStatus?.status === 'timer_running' && (
+        <button
+          onClick={async () => {
+            try {
+              const token = localStorage.getItem('auth_token');
+              await fetch('https://api.questcity.cloud/myhamsteracademia/api/show/boost-stock', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` }
+              });
+              // Immediately refresh status so chart reacts
+              const statusRes = await fetch('https://api.questcity.cloud/myhamsteracademia/api/show/status');
+              const statusData = await statusRes.json();
+              setShowStatus(statusData);
+            } catch (err) {
+              console.error(err);
+            }
+          }}
+          style={{
+            position: 'absolute', bottom: '60px', left: '50%', transform: 'translateX(-50%)',
+            width: '120px', height: '120px', borderRadius: '50%',
+            background: 'radial-gradient(circle at 40% 35%, #ff4444, #c0392b)',
+            border: '5px solid rgba(255,100,100,0.3)',
+            boxShadow: '0 0 50px rgba(255,68,68,0.4), 0 10px 30px rgba(0,0,0,0.4), inset 0 -6px 0 rgba(0,0,0,0.3)',
+            cursor: 'pointer', fontSize: '14px', fontWeight: 900, color: '#fff',
+            letterSpacing: '1px', textTransform: 'uppercase',
+            transition: 'all 0.15s', zIndex: 100,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '4px'
+          }}
+          onMouseOver={(e) => { e.currentTarget.style.transform = 'translateX(-50%) scale(1.08)'; e.currentTarget.style.boxShadow = '0 0 70px rgba(255,68,68,0.6), 0 10px 30px rgba(0,0,0,0.4), inset 0 -6px 0 rgba(0,0,0,0.3)'; }}
+          onMouseOut={(e) => { e.currentTarget.style.transform = 'translateX(-50%) scale(1)'; e.currentTarget.style.boxShadow = '0 0 50px rgba(255,68,68,0.4), 0 10px 30px rgba(0,0,0,0.4), inset 0 -6px 0 rgba(0,0,0,0.3)'; }}
+          onMouseDown={(e) => e.currentTarget.style.transform = 'translateX(-50%) scale(0.95)'}
+          onMouseUp={(e) => e.currentTarget.style.transform = 'translateX(-50%) scale(1.08)'}
+        >
+          <span style={{ fontSize: '28px' }}>📈</span>
+          <span>BOOST</span>
+        </button>
+      )}
 
       {/* Debug Footer (Temporary) */}
       <div style={{ position: 'absolute', bottom: '10px', left: '0', width: '100%', textAlign: 'center', fontSize: '10px', color: '#444651', pointerEvents: 'none' }}>

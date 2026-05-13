@@ -271,3 +271,12 @@
 - Price display and percentage now update dynamically based on the latest data point.
 - Changed theme from green (bullish) to red (bearish) — line, gradient, LIVE badge, and percentage all use #ed4245.
 - Built frontend and deployed to production.
+
+## Commit: Add Judge role with stock boost button
+- Added 'judge' to User model role enum alongside 'user' and 'admin'.
+- Added `stockBoostAt` field (Unix timestamp) to ShowState model to track when a judge triggered a boost.
+- Created `POST /api/show/boost-stock` backend endpoint: only judges and admins can call it while a timer is running; sets `stockBoostAt` to current time.
+- Updated StockChart component to accept `showStatus` prop and react to `stockBoostAt`: when boosted (within last 10 seconds), chart rises aggressively (85% chance of +4–16 points) with green color theme; after 10 seconds, resumes bearish red trend.
+- Added a large red circular BOOST button (📈) at the bottom-center of the Main page, visible only to judges and admins when a timer is running.
+- Button immediately refreshes show status after clicking so the chart reacts instantly.
+- Built frontend and restarted backend.

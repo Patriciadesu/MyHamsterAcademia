@@ -395,6 +395,33 @@ app.post('/api/show/force-trigger-timer', requireAdmin, async (req, res) => {
   }
 });
 
+// Boost stock (Judge only)
+app.post('/api/show/boost-stock', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) return res.status(401).json({ error: 'Unauthorized' });
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const user = await User.findOne({ discordId: decoded.id });
+    if (!user) return res.status(401).json({ error: 'User not found' });
+    if (user.role !== 'judge' && user.role !== 'admin') {
+      return res.status(403).json({ error: 'Only judges can boost stock' });
+    }
+
+    const state = await ShowState.findOne({});
+    if (!state || state.status !== 'timer_running') {
+      return res.status(400).json({ error: 'No active timer running' });
+    }
+
+    state.stockBoostAt = Date.now();
+    await state.save();
+
+    res.json({ success: true, stockBoostAt: state.stockBoostAt });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to boost stock' });
+  }
+});
+
 // Move to next group (Admin only)
 app.post('/api/show/next', requireAdmin, async (req, res) => {
   try {

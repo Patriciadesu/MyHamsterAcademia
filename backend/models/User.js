@@ -10,7 +10,7 @@ const userSchema = new mongoose.Schema({
   class: { type: String, enum: ['Starway', 'NSC', 'Staff'] },
   group: { type: String },
   coin: { type: Number, default: 0 },
-  role: { type: String, enum: ['user', 'admin'], default: 'user' },
+  role: { type: String, enum: ['user', 'admin', 'judge'], default: 'user' },
 });
 
 module.exports = mongoose.model('User', userSchema);
