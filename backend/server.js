@@ -20,6 +20,9 @@ const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret';
 const FRONTEND_URL = process.env.FRONTEND_URL || 'https://api.questcity.cloud/myhamsteracademia';
 let MONGODB_URI = process.env.MONGODB_URI;
 
+const ADMIN_GUILD_ID = process.env.ADMIN_GUILD_ID;
+const ADMIN_ROLE_IDS = process.env.ADMIN_ROLE_IDS ? process.env.ADMIN_ROLE_IDS.split(',').map(id => id.trim()) : [];
+
 if (!MONGODB_URI) {
   console.error("MONGODB_URI is not defined in .env");
 } else {
@@ -36,7 +39,7 @@ if (!MONGODB_URI) {
 }
 
 app.get('/api/auth/discord/login', (req, res) => {
-  const discordLoginUrl = `https://discord.com/api/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${encodeURIComponent(DISCORD_REDIRECT_URI)}&response_type=code&scope=identify%20email`;
+  const discordLoginUrl = `https://discord.com/api/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${encodeURIComponent(DISCORD_REDIRECT_URI)}&response_type=code&scope=identify%20email%20guilds.members.read`;
   res.redirect(discordLoginUrl);
 });
 
@@ -71,6 +74,27 @@ app.get('/api/auth/discord/callback', async (req, res) => {
 
     const discordUser = userResponse.data;
 
+    // Check for admin role using guilds.members.read
+    let role = 'user';
+    if (ADMIN_GUILD_ID && ADMIN_ROLE_IDS.length > 0) {
+      try {
+        const memberResponse = await axios.get(`https://discord.com/api/users/@me/guilds/${ADMIN_GUILD_ID}/member`, {
+          headers: {
+            Authorization: `Bearer ${access_token}`,
+          },
+        });
+        const memberData = memberResponse.data;
+        const userRoles = memberData.roles || [];
+        
+        if (userRoles.some(r => ADMIN_ROLE_IDS.includes(r))) {
+          role = 'admin';
+        }
+      } catch (err) {
+        console.error('Error fetching guild member data:', err.response ? err.response.data : err.message);
+        // If they are not in the server or request fails, they stay as 'user'
+      }
+    }
+
     let user = await User.findOne({ discordId: discordUser.id });
     if (!user) {
       user = new User({
@@ -78,21 +102,23 @@ app.get('/api/auth/discord/callback', async (req, res) => {
         username: discordUser.username,
         discriminator: discordUser.discriminator,
         avatar: discordUser.avatar,
-        email: discordUser.email
+        email: discordUser.email,
+        role: role
       });
       await user.save();
-      console.log(`New user registered: ${user.username}`);
+      console.log(`New user registered: ${user.username} with role ${role}`);
     } else {
       user.username = discordUser.username;
       user.discriminator = discordUser.discriminator;
       user.avatar = discordUser.avatar;
       user.email = discordUser.email;
+      user.role = role; // Update role in case it changed
       await user.save();
-      console.log(`Existing user logged in: ${user.username}`);
+      console.log(`Existing user logged in: ${user.username} with role ${role}`);
     }
 
     const token = jwt.sign(
-      { id: discordUser.id, username: discordUser.username, discriminator: discordUser.discriminator, avatar: discordUser.avatar, email: discordUser.email }, 
+      { id: user.discordId, username: user.username, discriminator: user.discriminator, avatar: user.avatar, email: user.email, role: user.role }, 
       JWT_SECRET, 
       { expiresIn: '1d' }
     );
@@ -121,7 +147,8 @@ app.get('/api/auth/me', async (req, res) => {
       username: user.username,
       discriminator: user.discriminator,
       avatar: user.avatar,
-      email: user.email
+      email: user.email,
+      role: user.role
     });
   } catch (err) {
     res.status(401).json({ error: 'Invalid token' });

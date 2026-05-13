@@ -102,7 +102,33 @@ function Main() {
       <div style={{ backgroundColor: '#2f3136', padding: '40px', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', textAlign: 'center', width: '350px' }}>
         <img src={avatarUrl} alt="Avatar" style={{ borderRadius: '50%', width: '100px', height: '100px', marginBottom: '20px' }} />
         <h2>{user.username}#{user.discriminator}</h2>
-        <p style={{ color: '#b9bbbe', marginTop: '10px' }}>{user.email}</p>
+        <p style={{ color: '#b9bbbe', marginTop: '5px', marginBottom: '15px' }}>{user.email}</p>
+        
+        {user.role === 'admin' && (
+          <div style={{ backgroundColor: '#faa61a', color: 'white', padding: '5px 10px', borderRadius: '15px', fontSize: '12px', fontWeight: 'bold', display: 'inline-block', marginBottom: '20px' }}>
+            ADMIN
+          </div>
+        )}
+
+        {user.role === 'admin' && (
+          <button 
+            onClick={() => navigate('/admin')}
+            style={{ 
+              backgroundColor: '#5865F2', 
+              color: 'white', 
+              border: 'none', 
+              padding: '10px 20px', 
+              borderRadius: '4px', 
+              marginBottom: '10px',
+              cursor: 'pointer',
+              width: '100%',
+              fontWeight: 'bold'
+            }}
+          >
+            Admin Panel
+          </button>
+        )}
+
         <button 
           onClick={handleLogout}
           style={{ 
@@ -111,9 +137,9 @@ function Main() {
             border: 'none', 
             padding: '10px 20px', 
             borderRadius: '4px', 
-            marginTop: '20px',
             cursor: 'pointer',
-            width: '100%'
+            width: '100%',
+            fontWeight: 'bold'
           }}
         >
           Logout
@@ -123,12 +149,43 @@ function Main() {
   )
 }
 
+function Admin() {
+  const navigate = useNavigate();
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', backgroundColor: '#36393f', color: '#ffffff' }}>
+      <div style={{ backgroundColor: '#2f3136', padding: '50px', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', textAlign: 'center', width: '500px' }}>
+        <h1 style={{ marginBottom: '30px', fontSize: '32px' }}>Admin Panel</h1>
+        <p style={{ color: '#b9bbbe', marginBottom: '40px' }}>Welcome to the admin dashboard. This area is under construction.</p>
+        
+        <button 
+          onClick={() => navigate('/main')}
+          style={{ 
+            backgroundColor: '#4f545c', 
+            color: 'white', 
+            border: 'none', 
+            padding: '12px 24px', 
+            borderRadius: '4px', 
+            cursor: 'pointer',
+            fontWeight: 'bold',
+            transition: 'background-color 0.2s'
+          }}
+          onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#686d73'}
+          onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#4f545c'}
+        >
+          Return to Main Menu
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function App() {
   return (
     <Router basename="/myhamsteracademia">
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/main" element={<Main />} />
+        <Route path="/admin" element={<Admin />} />
       </Routes>
     </Router>
   )

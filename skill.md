@@ -61,3 +61,10 @@
 ## Commit: Update User schema
 - User manually added class, group, and coin properties to User model.
 - Added role Enum (user/admin) with default value 'user' to User model.
+
+## Commit: Add Discord Admin Role Verification
+- Added ADMIN_GUILD_ID and ADMIN_ROLE_IDS variables to .env.
+- Updated backend Discord OAuth scope to include guilds.members.read.
+- Backend now queries Discord API to check if logging in user has the admin role in the specified guild.
+- Updated frontend to conditionally display an "Admin Panel" button if user.role === 'admin'.
+- Added a blank /admin page with a return button.
