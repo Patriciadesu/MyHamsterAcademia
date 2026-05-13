@@ -232,13 +232,8 @@ function Admin() {
         <div style={{ width: '48px', height: '48px', borderRadius: '8px', overflow: 'hidden', backgroundColor: '#1d2025', flexShrink: 0 }}>
           <img src={u.img} alt={u.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', justifyContent: 'center' }}>
           <span style={{ fontSize: '16px', fontWeight: 700, color: '#e0e2ea', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{u.name}</span>
-          <div style={{ display: 'flex', gap: '8px', marginTop: '4px', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '11px', fontWeight: 500, backgroundColor: '#1d2025', color: '#c5c5d3', padding: '2px 8px', borderRadius: '4px' }}>{u.role}</span>
-            <span style={{ fontSize: '11px', fontWeight: 500, color: u.class === 'Starway' ? '#b6c4ff' : '#eac24b', backgroundColor: 'rgba(255,255,255,0.05)', padding: '2px 8px', borderRadius: '4px' }}>{u.class}</span>
-            {u.group && <span style={{ fontSize: '11px', fontWeight: 500, color: '#8f909c', backgroundColor: 'rgba(255,255,255,0.05)', padding: '2px 8px', borderRadius: '4px' }}>{u.group}</span>}
-          </div>
         </div>
       </div>
     </div>
