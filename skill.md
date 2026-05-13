@@ -48,3 +48,7 @@
 
 ## Commit: Update Discord callback URL
 - Changed DISCORD_CALLBACK_URL in .env to correctly point to the myhamsteracademia domain.
+
+## Commit: Make page fullscreen
+- Updated index.css to reset margins and make html, body, and #root take 100% width/height with no overflow.
+- Updated App.tsx components to use width/height 100% instead of fixed 100vh.
