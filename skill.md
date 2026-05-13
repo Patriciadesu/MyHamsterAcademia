@@ -45,3 +45,6 @@
 
 ## Commit: Fix port conflict again
 - Changed backend PORT to 3111 because 3005 was also occupied.
+
+## Commit: Update Discord callback URL
+- Changed DISCORD_CALLBACK_URL in .env to correctly point to the myhamsteracademia domain.
