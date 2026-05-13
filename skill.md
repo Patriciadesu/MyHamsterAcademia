@@ -42,3 +42,6 @@
 ## Commit: Fix port conflict for backend
 - Changed backend PORT to 3005 to resolve conflict with another running app on port 3000.
 - Updated Nginx proxy_pass to point to the new port 3005.
+
+## Commit: Fix port conflict again
+- Changed backend PORT to 3111 because 3005 was also occupied.

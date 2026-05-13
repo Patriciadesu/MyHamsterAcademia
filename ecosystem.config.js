@@ -5,7 +5,7 @@ module.exports = {
       script: 'server.js',
       cwd: './backend',
       env: {
-        PORT: 3005
+        PORT: 3111
       }
     },
     {
