@@ -91,3 +91,57 @@
 - Created an elegant toggle switch specifically inside each class foldout titled "Group View".
 - When toggled on, the application dynamically restructures the grid to section users off by their dedicated `group` variables, creating categorized sub-grids.
 - Handled edge cases by automatically grouping users without a group variable into an "Ungrouped" section pinned to the bottom of the foldout.
+
+## Commit: Add Staff and Unassigned foldouts, enable page scrolling
+- Added dedicated foldout section for "Staff" class.
+- Added "Unassigned" foldout for users with no class set.
+- Enabled vertical page scrolling by setting min-height: 100vh and overflow-y: auto on the root element.
+
+## Commit: Add drag-and-drop group assignment and nested group foldouts
+- Made user cards draggable using HTML5 drag-and-drop API.
+- Group View now renders each group as a nested foldout inside the class section.
+- Dropping a user card onto a group foldout reassigns their group in local state.
+- Groups without a named group are shown at the bottom as "Ungrouped".
+
+## Commit: Simplify user cards in foldouts
+- Removed role, class, and group labels from user cards inside foldouts.
+- Cards now show only the user's Discord username and avatar for a cleaner look.
+
+## Commit: Wire admin panel to MongoDB — live data fetch + group persistence + bulk seed
+- Removed all hardcoded mock user data from App.tsx.
+- Admin panel now fetches real users from GET /api/users on load.
+- Added requireAdmin middleware to protect admin-only endpoints.
+- Added GET /api/users and PUT /api/users/:id/group backend routes.
+- Drag-and-drop group changes now persist to MongoDB via PUT request.
+- Added loading state with spinner while data is fetched.
+- Created backend/seed.js for bulk-inserting 32 dummy users across all classes.
+
+## Commit: Fix seed.js role enum values to match User model
+- Fixed seed.js to use 'user' and 'admin' role values matching the mongoose enum, replacing invalid values like 'Administrator', 'Moderator', etc.
+
+## Commit: Add PUT /api/users/:id/class endpoint
+- Added backend route to update a user's class field independently.
+
+## Commit: Group view on by default, drag-to-change-class with backend persistence
+- Group View toggle now defaults to enabled for all class sections.
+- User _id is now stored in dataTransfer during drag to enable accurate backend updates.
+- Dropping a user on a class section header moves them to that class in both UI and MongoDB.
+
+## Commit: Group foldouts closed by default, fix class drag-drop using div wrapper
+- Group sub-foldouts (Alpha, Beta, etc.) are now closed by default.
+- Fixed class drop zone by wrapping the section header button in a div, since browsers block drop events on button elements.
+
+## Commit: Global group view toggle, drag to group/class directly, Ungrouped open by default
+- Replaced per-class groupView state with a single global boolean toggle.
+- Group View toggle moved to the sticky header (top-right), visible only on User Management tab.
+- Ungrouped sub-foldout is open by default; named groups remain closed by default.
+- Dropping a user onto any group foldout or flat member list now updates both class and group simultaneously.
+- Empty class sections show a styled drop zone with instructional text.
+- handleDrop now handles both class and group in a single function, removing the separate handleDropClass.
+
+## Commit: Add tab nav — User Management, Random Queue, Show Manager with blank placeholder pages
+- Renamed top-left header from "User Management" to "⚙ Admin Panel".
+- Added a centered pill-style tab navigation bar with three tabs: User Management, Random Queue, Show Manager.
+- Clicking a tab switches the main content area accordingly.
+- Random Queue and Show Manager are blank placeholder pages with "Coming soon..." text.
+- Group View toggle only appears in the header when on the User Management tab.
