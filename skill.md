@@ -52,3 +52,8 @@
 ## Commit: Make page fullscreen
 - Updated index.css to reset margins and make html, body, and #root take 100% width/height with no overflow.
 - Updated App.tsx components to use width/height 100% instead of fixed 100vh.
+
+## Commit: Add MongoDB user registration
+- Installed mongoose.
+- Created User model to store discordId, username, discriminator, avatar, and email.
+- Updated server.js to connect to MongoDB and automatically register or update users during the Discord OAuth callback.
