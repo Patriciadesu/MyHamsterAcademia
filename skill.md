@@ -38,3 +38,7 @@
 
 ## Commit: Update Discord callback variable
 - Updated server.js to read from DISCORD_CALLBACK_URL environment variable as requested.
+
+## Commit: Fix port conflict for backend
+- Changed backend PORT to 3005 to resolve conflict with another running app on port 3000.
+- Updated Nginx proxy_pass to point to the new port 3005.
