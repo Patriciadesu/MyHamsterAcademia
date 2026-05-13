@@ -80,8 +80,58 @@ function Main() {
 
   if (!user) return null;
 
+  const avatarUrl = user.avatar
+    ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
+    : `https://cdn.discordapp.com/embed/avatars/${parseInt(user.discriminator || '0') % 5}.png`;
+
+  const classColors: Record<string, string> = {
+    Starway: '#768dde',
+    NSC: '#57c4a0',
+    Staff: '#faa61a',
+  };
+  const classColor = classColors[user.class] || '#8f909c';
+
   return (
-    <div style={{ width: '100%', height: '100%', backgroundColor: '#36393f' }} />
+    <div style={{ width: '100%', height: '100%', backgroundColor: '#36393f', position: 'relative' }}>
+      {/* Top-left banner */}
+      <div style={{
+        position: 'absolute', top: '24px', left: '24px',
+        display: 'flex', alignItems: 'center', gap: '16px',
+        backgroundColor: 'rgba(39, 42, 48, 0.85)',
+        backdropFilter: 'blur(12px)',
+        border: '1px solid rgba(68, 70, 81, 0.6)',
+        borderRadius: '16px',
+        padding: '14px 20px',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+      }}>
+        {/* Avatar */}
+        <div style={{ position: 'relative', flexShrink: 0 }}>
+          <img
+            src={avatarUrl}
+            alt={user.username}
+            style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: `2px solid ${classColor}` }}
+          />
+          <div style={{
+            position: 'absolute', bottom: 0, right: 0,
+            width: '14px', height: '14px', borderRadius: '50%',
+            backgroundColor: '#57c44f', border: '2px solid #272a30'
+          }} />
+        </div>
+        {/* Info */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          <span style={{ fontSize: '16px', fontWeight: 700, color: '#e0e2ea', lineHeight: 1 }}>{user.username}</span>
+          {user.class ? (
+            <span style={{
+              fontSize: '12px', fontWeight: 600, color: classColor,
+              backgroundColor: `${classColor}22`,
+              padding: '2px 10px', borderRadius: '20px', display: 'inline-block', marginTop: '2px'
+            }}>{user.class}</span>
+          ) : (
+            <span style={{ fontSize: '12px', color: '#8f909c' }}>No Class</span>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
 

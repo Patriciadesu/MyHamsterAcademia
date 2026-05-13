@@ -173,3 +173,10 @@
 ## Commit: Reset Main page to blank
 - Replaced all UI content in the Main component with a plain empty div matching the background color.
 - Auth/redirect logic is preserved: token handling, API call to /api/auth/me, and redirect to login if unauthenticated.
+
+## Commit: Add user banner to Main page top-left
+- Added a glassmorphism-style banner card in the top-left of the Main page.
+- Banner displays: avatar (with green online dot), username, and class badge.
+- Class badge color is unique per class: Starway = blue, NSC = teal, Staff = gold.
+- Avatar border color matches the class color.
+- Users with no class assigned show a grey "No Class" label.
