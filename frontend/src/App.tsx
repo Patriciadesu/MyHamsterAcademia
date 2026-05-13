@@ -151,6 +151,7 @@ function Main() {
 
 function Admin() {
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<'UserManagement' | 'RandomQueue' | 'ShowManager'>('UserManagement');
   const [searchQuery, setSearchQuery] = useState('');
   const [openSections, setOpenSections] = useState({
     Starway: true,
@@ -402,19 +403,41 @@ function Admin() {
     <div style={{ backgroundColor: '#36393f', minHeight: '100vh', width: '100%', color: '#e0e2ea', fontFamily: '"Inter", sans-serif', paddingBottom: '80px', boxSizing: 'border-box', overflowY: 'auto' }}>
       {/* Header */}
       <header style={{ position: 'sticky', top: 0, backgroundColor: '#272a30', height: '64px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 24px', zIndex: 40, boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <h1 style={{ fontSize: '20px', fontWeight: 600, margin: 0, color: '#e0e2ea' }}>User Management</h1>
+        {/* Left: Brand */}
+        <div style={{ display: 'flex', alignItems: 'center', minWidth: '160px' }}>
+          <h1 style={{ fontSize: '18px', fontWeight: 700, margin: 0, color: '#768dde', letterSpacing: '0.5px' }}>⚙ Admin Panel</h1>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span style={{ fontSize: '13px', color: groupView ? '#e0e2ea' : '#8f909c', fontWeight: 600, transition: 'color 0.2s' }}>Group View</span>
-            <button
-              onClick={() => setGroupView(v => !v)}
-              style={{ width: '44px', height: '24px', borderRadius: '12px', backgroundColor: groupView ? '#768dde' : '#444651', border: 'none', position: 'relative', cursor: 'pointer', transition: 'background-color 0.2s', flexShrink: 0 }}
-            >
-              <div style={{ width: '18px', height: '18px', borderRadius: '50%', backgroundColor: '#fff', position: 'absolute', top: '3px', left: groupView ? '23px' : '3px', transition: 'left 0.2s', boxShadow: '0 2px 4px rgba(0,0,0,0.2)' }} />
-            </button>
-          </div>
+
+        {/* Center: Tab Nav */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', backgroundColor: '#1d2025', borderRadius: '10px', padding: '4px' }}>
+          {(['UserManagement', 'RandomQueue', 'ShowManager'] as const).map(tab => {
+            const labels: Record<string, string> = { UserManagement: 'User Management', RandomQueue: 'Random Queue', ShowManager: 'Show Manager' };
+            const isActive = activeTab === tab;
+            return (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                style={{ padding: '7px 18px', borderRadius: '7px', border: 'none', cursor: 'pointer', fontSize: '13px', fontWeight: isActive ? 700 : 500, backgroundColor: isActive ? '#768dde' : 'transparent', color: isActive ? '#fff' : '#8f909c', transition: 'all 0.18s' }}
+              >
+                {labels[tab]}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Right: Group View toggle + Avatar */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', minWidth: '160px', justifyContent: 'flex-end' }}>
+          {activeTab === 'UserManagement' && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <span style={{ fontSize: '13px', color: groupView ? '#e0e2ea' : '#8f909c', fontWeight: 600, transition: 'color 0.2s' }}>Group View</span>
+              <button
+                onClick={() => setGroupView(v => !v)}
+                style={{ width: '44px', height: '24px', borderRadius: '12px', backgroundColor: groupView ? '#768dde' : '#444651', border: 'none', position: 'relative', cursor: 'pointer', transition: 'background-color 0.2s', flexShrink: 0 }}
+              >
+                <div style={{ width: '18px', height: '18px', borderRadius: '50%', backgroundColor: '#fff', position: 'absolute', top: '3px', left: groupView ? '23px' : '3px', transition: 'left 0.2s', boxShadow: '0 2px 4px rgba(0,0,0,0.2)' }} />
+              </button>
+            </div>
+          )}
           <div style={{ width: '32px', height: '32px', borderRadius: '50%', overflow: 'hidden', border: '1px solid #444651' }}>
             <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7tJGS7fdTyrmWAVD8MklMhf-KNzZxMb8u_0dXZuwiVWNpKX1_xOGQCh6b4RCFO7BU70FeQJGjZqwYJLxAZ8fuLGdp7igfuUUMG9yWV_72ZIguuetdGL9hoKaJC5fKU0FDx_F3_4aNkUJSumLf1b5yEn-r2sYbXjSGgyO3XYUNtg4lT3agzek5OpKG6-epHSbZmvdql7UGHKFwfEOlcDVMGiqDtAcIEStOLE1ecRHXOzKcYKDcxyQmC7SdW5ULwEsyuEWbCw3RfHPk" alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </div>
@@ -422,30 +445,50 @@ function Admin() {
       </header>
 
       <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
-        
-        {/* Controls */}
-        <section style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
-          <div style={{ flex: '1 1 100%', position: 'relative' }}>
-            <input 
-              type="text" 
-              placeholder="Search for users..." 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              style={{ width: '100%', height: '48px', padding: '0 16px', backgroundColor: '#191c21', border: '1px solid #191c21', borderRadius: '8px', color: '#e0e2ea', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }}
-            />
+
+        {activeTab === 'UserManagement' && (
+          <>
+            {/* Search */}
+            <section style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
+              <div style={{ flex: '1 1 100%', position: 'relative' }}>
+                <input
+                  type="text"
+                  placeholder="Search for users..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  style={{ width: '100%', height: '48px', padding: '0 16px', backgroundColor: '#191c21', border: '1px solid #191c21', borderRadius: '8px', color: '#e0e2ea', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }}
+                />
+              </div>
+            </section>
+
+            {/* Class Foldouts */}
+            <section style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              {renderClassSection('Staff')}
+              {renderClassSection('Starway')}
+              {renderClassSection('NSC')}
+              {renderClassSection('Unassigned')}
+            </section>
+          </>
+        )}
+
+        {activeTab === 'RandomQueue' && (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '400px', color: '#8f909c', gap: '16px' }}>
+            <span style={{ fontSize: '48px' }}>🎲</span>
+            <h2 style={{ margin: 0, fontSize: '22px', fontWeight: 700, color: '#e0e2ea' }}>Random Queue</h2>
+            <p style={{ margin: 0, fontSize: '14px' }}>Coming soon...</p>
           </div>
-        </section>
+        )}
 
-        {/* Foldout Sections */}
-        <section style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-          {renderClassSection('Staff')}
-          {renderClassSection('Starway')}
-          {renderClassSection('NSC')}
-          {renderClassSection('Unassigned')}
-        </section>
+        {activeTab === 'ShowManager' && (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '400px', color: '#8f909c', gap: '16px' }}>
+            <span style={{ fontSize: '48px' }}>🎬</span>
+            <h2 style={{ margin: 0, fontSize: '22px', fontWeight: 700, color: '#e0e2ea' }}>Show Manager</h2>
+            <p style={{ margin: 0, fontSize: '14px' }}>Coming soon...</p>
+          </div>
+        )}
 
-        {/* Actions */}
-        <button 
+        {/* Return button */}
+        <button
           onClick={() => navigate('/main')}
           style={{ width: '100%', marginTop: '32px', padding: '16px', backgroundColor: '#768dde', color: '#00226e', fontSize: '16px', fontWeight: 700, border: 'none', borderRadius: '12px', cursor: 'pointer', transition: 'transform 0.1s' }}
           onMouseOver={(e) => e.currentTarget.style.opacity = '0.9'}
