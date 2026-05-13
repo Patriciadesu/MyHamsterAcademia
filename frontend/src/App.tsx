@@ -1,5 +1,3 @@
-import { useState } from 'react'
-
 function App() {
   const handleDiscordLogin = () => {
     // In a real app, you would redirect to the Discord OAuth2 URL here.

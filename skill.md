@@ -23,3 +23,7 @@
 ## Commit: Create .env file
 - Added backend/.env file with MongoDB connection string, frontend URL, Discord placeholders, and necessary vars.
 - Updated .gitignore to exclude .env files to ensure security.
+
+## Commit: Host website at frontend URL
+- Updated Vite config to build for /myhamsteracademia/ base path and output to /var/www/myhamsteracademia.
+- Added Nginx location block for /myhamsteracademia/ pointing to the build directory.
