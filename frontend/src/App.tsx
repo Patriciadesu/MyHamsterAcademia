@@ -152,6 +152,75 @@ function Main() {
     boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
   };
 
+  const StockChart = () => {
+    const [chartData, setChartData] = useState([40, 45, 42, 50, 48, 55, 52, 60, 58, 65, 62, 70, 68, 75, 72, 80]);
+    
+    useEffect(() => {
+      const interval = setInterval(() => {
+        setChartData(prev => {
+          const last = prev[prev.length - 1];
+          const next = Math.max(20, Math.min(80, last + (Math.random() * 12 - 6)));
+          return [...prev.slice(1), next];
+        });
+      }, 2000);
+      return () => clearInterval(interval);
+    }, []);
+
+    const points = chartData.map((d, i) => `${i * 24},${100 - d}`).join(' ');
+
+    return (
+      <div style={{ 
+        padding: '24px', backgroundColor: 'rgba(30, 33, 38, 0.6)', borderRadius: '24px', 
+        border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(16px)', 
+        width: '420px', boxShadow: '0 20px 50px rgba(0,0,0,0.3)',
+        animation: 'fadeIn 0.5s ease-out'
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <span style={{ fontSize: '12px', color: '#8f909c', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>Market Activity</span>
+            <span style={{ fontSize: '28px', fontWeight: 900, color: '#e0e2ea', display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+              $4,284.60
+              <span style={{ fontSize: '14px', color: '#57c4a0', fontWeight: 700 }}>+5.24%</span>
+            </span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: 'rgba(87, 196, 160, 0.1)', padding: '6px 12px', borderRadius: '8px' }}>
+            <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#57c4a0', animation: 'pulse 1.5s infinite' }} />
+            <span style={{ color: '#57c4a0', fontSize: '11px', fontWeight: 800 }}>LIVE</span>
+          </div>
+        </div>
+        <svg viewBox="0 0 360 100" style={{ width: '100%', height: '140px', overflow: 'visible' }}>
+          <defs>
+            <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#57c4a0" stopOpacity="0.4" />
+              <stop offset="100%" stopColor="#57c4a0" stopOpacity="0" />
+            </linearGradient>
+          </defs>
+          <polyline
+            fill="url(#chartGradient)"
+            stroke="none"
+            points={`0,100 ${points} 360,100`}
+            style={{ transition: 'all 0.5s ease' }}
+          />
+          <polyline
+            fill="none"
+            stroke="#57c4a0"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            points={points}
+            style={{ filter: 'drop-shadow(0 0 12px rgba(87, 196, 160, 0.6))', transition: 'all 0.5s ease' }}
+          />
+        </svg>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '16px' }}>
+          <span style={{ fontSize: '10px', color: '#444651', fontWeight: 600 }}>09:00</span>
+          <span style={{ fontSize: '10px', color: '#444651', fontWeight: 600 }}>12:00</span>
+          <span style={{ fontSize: '10px', color: '#444651', fontWeight: 600 }}>15:00</span>
+          <span style={{ fontSize: '10px', color: '#444651', fontWeight: 600 }}>18:00</span>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div style={{ width: '100vw', height: '100vh', backgroundColor: '#36393f', position: 'relative', overflow: 'hidden' }}>
 
@@ -279,6 +348,19 @@ function Main() {
             <div style={{ fontSize: '120px', fontWeight: 900, color: timeLeft < 30 ? '#ed4245' : '#e0e2ea', lineHeight: 1, fontFamily: 'monospace' }}>
               {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
             </div>
+          </div>
+        )}
+
+        {showStatus?.status === 'timer_running' && showStatus.currentGroupName !== user.group && (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '32px' }}>
+             <div style={{ textAlign: 'center' }}>
+               <span style={{ fontSize: '14px', fontWeight: 800, color: '#faa61a', textTransform: 'uppercase', letterSpacing: '2px', backgroundColor: 'rgba(250, 166, 26, 0.1)', padding: '6px 20px', borderRadius: '30px' }}>
+                 Ongoing Show
+               </span>
+               <h2 style={{ fontSize: '32px', fontWeight: 900, color: '#e0e2ea', margin: '16px 0 8px 0' }}>Group {showStatus.currentGroupName} is Live</h2>
+               <p style={{ margin: 0, color: '#8f909c', fontSize: '16px' }}>Please wait for your turn. Analyzing market trends...</p>
+             </div>
+             <StockChart />
           </div>
         )}
 

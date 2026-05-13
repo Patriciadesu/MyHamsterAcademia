@@ -225,3 +225,12 @@
 - Changed the Main container to use viewport units (100vw/100vh) and overflow:hidden to ensure the background covers the entire screen and elements are not pushed off-page.
 - Increased z-index for both buttons to ensure they appear above other UI layers.
 - Fixed a syntax error in App.tsx that was causing build issues.
+
+## Commit: Add dynamic Stock Chart for waiting groups
+- Implemented a custom StockChart component in the Main page.
+- Component features a live-animating SVG line chart with a glowing neon green gradient and area fill.
+- Displays randomized market data ("Hamster Index") to simulate real-time activity.
+- Configured conditional rendering:
+  - Active group sees their 2-minute timer.
+  - Waiting groups (not their turn) see the Stock Chart along with a "Please wait for your turn" message.
+- Applied premium glassmorphism styling to the chart card with backdrop blur and subtle pulsing animations.
