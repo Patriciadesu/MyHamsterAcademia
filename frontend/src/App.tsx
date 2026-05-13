@@ -45,6 +45,8 @@ function Login() {
 function Main() {
   const [user, setUser] = useState<any>(null);
   const [queuePosition, setQueuePosition] = useState<number | null>(null);
+  const [showStatus, setShowStatus] = useState<any>(null);
+  const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -90,6 +92,37 @@ function Main() {
       })
       .catch(err => console.error(err));
   }, [navigate, location]);
+
+  // Poll show status
+  useEffect(() => {
+    const fetchStatus = () => {
+      fetch('https://api.questcity.cloud/myhamsteracademia/api/show/status')
+        .then(res => res.json())
+        .then(data => setShowStatus(data))
+        .catch(err => console.error(err));
+    };
+
+    fetchStatus();
+    const interval = setInterval(fetchStatus, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Timer logic
+  useEffect(() => {
+    if (showStatus?.status === 'timer_running' && showStatus.timerStartedAt) {
+      const timer = setInterval(() => {
+        const start = new Date(showStatus.timerStartedAt).getTime();
+        const now = new Date().getTime();
+        const elapsed = Math.floor((now - start) / 1000);
+        const remaining = Math.max(0, showStatus.timerDuration - elapsed);
+        setTimeLeft(remaining);
+        if (remaining <= 0) clearInterval(timer);
+      }, 1000);
+      return () => clearInterval(timer);
+    } else {
+      setTimeLeft(null);
+    }
+  }, [showStatus]);
 
   if (!user) return null;
 
@@ -154,6 +187,49 @@ function Main() {
           </>
         ) : (
           <span style={{ fontSize: '40px', fontWeight: 900, color: '#444651', lineHeight: 1 }}>—</span>
+        )}
+      </div>
+
+      {/* Center: Show Manager Interaction */}
+      <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px' }}>
+        {showStatus?.status === 'waiting_for_group' && showStatus.activeClass === user.class && showStatus.currentGroupName === user.group && (
+          <button
+            onClick={async () => {
+              try {
+                const token = localStorage.getItem('auth_token');
+                await fetch('https://api.questcity.cloud/myhamsteracademia/api/show/trigger-timer', {
+                  method: 'POST',
+                  headers: { 'Authorization': `Bearer ${token}` }
+                });
+              } catch (err) {
+                console.error(err);
+              }
+            }}
+            style={{
+              padding: '20px 60px', fontSize: '24px', fontWeight: 900, borderRadius: '50px',
+              backgroundColor: '#57c4a0', color: '#fff', border: 'none', cursor: 'pointer',
+              boxShadow: '0 0 40px rgba(87, 196, 160, 0.4)', transition: 'transform 0.1s'
+            }}
+            onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.95)'}
+            onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
+          >
+            START SHOW
+          </button>
+        )}
+
+        {showStatus?.status === 'timer_running' && showStatus.activeClass === user.class && showStatus.currentGroupName === user.group && timeLeft !== null && (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+            <span style={{ fontSize: '18px', fontWeight: 700, color: '#8f909c', textTransform: 'uppercase' }}>Show Time</span>
+            <div style={{ fontSize: '120px', fontWeight: 900, color: timeLeft < 30 ? '#ed4245' : '#e0e2ea', lineHeight: 1, fontFamily: 'monospace' }}>
+              {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
+            </div>
+          </div>
+        )}
+
+        {showStatus?.status === 'idle' && (
+          <div style={{ color: '#444651', fontSize: '24px', fontWeight: 700, opacity: 0.3 }}>
+            NO SHOW ACTIVE
+          </div>
         )}
       </div>
 
@@ -640,9 +716,24 @@ function Admin() {
 
             {/* Big green button */}
             <button
-              onClick={() => {
+              onClick={async () => {
                 if (!showManagerClass) return;
-                console.log(`Starting game for ${showManagerClass}`);
+                try {
+                  const token = localStorage.getItem('auth_token');
+                  const res = await fetch('https://api.questcity.cloud/myhamsteracademia/api/show/start', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ class: showManagerClass })
+                  });
+                  const data = await res.json();
+                  if (data.success) {
+                    alert(`Show started for ${showManagerClass}`);
+                  } else {
+                    alert(data.error || 'Failed to start show');
+                  }
+                } catch (err) {
+                  console.error(err);
+                }
               }}
               disabled={!showManagerClass}
               style={{

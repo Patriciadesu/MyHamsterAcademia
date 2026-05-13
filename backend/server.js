@@ -8,6 +8,7 @@ const mongoose = require('mongoose');
 const User = require('./models/User');
 const Group = require('./models/Group');
 const ClassQueue = require('./models/ClassQueue');
+const ShowState = require('./models/ShowState');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -290,6 +291,87 @@ app.post('/api/groups/randomize-class', requireAdmin, async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to randomize class queue' });
+  }
+});
+
+// Show Management Routes
+
+// Start show for a class (Admin only)
+app.post('/api/show/start', requireAdmin, async (req, res) => {
+  try {
+    const { class: targetClass } = req.body;
+    if (!targetClass) return res.status(400).json({ error: 'class is required' });
+
+    // Verify there is a queue for this class
+    const classQueue = await ClassQueue.findOne({ class: targetClass });
+    if (!classQueue || classQueue.queue.length === 0) {
+      return res.status(400).json({ error: 'No queue randomized for this class' });
+    }
+
+    // Reset show state
+    await ShowState.deleteMany({});
+    const newState = new ShowState({
+      activeClass: targetClass,
+      currentGroupIndex: 0,
+      status: 'waiting_for_group'
+    });
+    await newState.save();
+
+    res.json({ success: true, state: newState });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to start show' });
+  }
+});
+
+// Get current show status (All users)
+app.get('/api/show/status', async (req, res) => {
+  try {
+    const state = await ShowState.findOne({});
+    if (!state) return res.json({ status: 'idle' });
+
+    // Get current group info
+    const classQueue = await ClassQueue.findOne({ class: state.activeClass });
+    const currentGroup = classQueue ? classQueue.queue[state.currentGroupIndex] : null;
+
+    res.json({
+      ...state.toObject(),
+      currentGroupName: currentGroup ? currentGroup.name : null
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch show status' });
+  }
+});
+
+// Trigger timer (Group members only)
+app.post('/api/show/trigger-timer', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) return res.status(401).json({ error: 'Unauthorized' });
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const user = await User.findById(decoded.id);
+    if (!user) return res.status(401).json({ error: 'User not found' });
+
+    const state = await ShowState.findOne({});
+    if (!state || state.status !== 'waiting_for_group') {
+      return res.status(400).json({ error: 'Not waiting for group to start' });
+    }
+
+    // Verify user belongs to the current group
+    const classQueue = await ClassQueue.findOne({ class: state.activeClass });
+    const currentGroup = classQueue ? classQueue.queue[state.currentGroupIndex] : null;
+
+    if (!currentGroup || user.group !== currentGroup.name || user.class !== state.activeClass) {
+      return res.status(403).json({ error: 'You are not in the active group' });
+    }
+
+    state.status = 'timer_running';
+    state.timerStartedAt = new Date();
+    await state.save();
+
+    res.json({ success: true, state });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to trigger timer' });
   }
 });
 

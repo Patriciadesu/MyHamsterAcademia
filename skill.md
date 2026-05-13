@@ -195,3 +195,14 @@
 - Added a large circular "START" button that glows green when a class is selected.
 - The Start button currently logs to the console and acts as a placeholder for future game-starting logic.
 - Disabled the Start button and dimmed its appearance when no class is selected.
+
+## Commit: Add 2-minute timer and group show interaction
+- Created backend/models/ShowState.js to track active class, current group, and timer status.
+- Added POST /api/show/start (Admin) to initialize a show for a selected class.
+- Added GET /api/show/status (Public) to poll for the active show and timer progress.
+- Added POST /api/show/trigger-timer (User) to allow members of the active group to start their 2-minute countdown.
+- Updated Main page with real-time polling:
+  - Displays "START SHOW" button only for members of the group whose turn it is.
+  - Clicking "START SHOW" triggers a global 2-minute timer visible to the group members.
+  - Timer turns red when less than 30 seconds remain.
+  - Displays "NO SHOW ACTIVE" placeholder when idle.
