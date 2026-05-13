@@ -158,13 +158,7 @@ function Admin() {
     Staff: true,
     Unassigned: true
   });
-  const [groupView, setGroupView] = useState({
-    Starway: true,
-    NSC: true,
-    Staff: true,
-    Unassigned: true
-  });
-
+  const [groupView, setGroupView] = useState(true);
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [openGroupSections, setOpenGroupSections] = useState<Record<string, boolean>>({});
@@ -213,12 +207,8 @@ function Admin() {
     setOpenSections(prev => ({ ...prev, [section]: !prev[section as keyof typeof openSections] }));
   };
 
-  const toggleGroupView = (section: string) => {
-    setGroupView(prev => ({ ...prev, [section]: !prev[section as keyof typeof groupView] }));
-  };
-
   const toggleGroupSection = (groupKey: string) => {
-    setOpenGroupSections(prev => ({ ...prev, [groupKey]: prev[groupKey] === undefined ? false : !prev[groupKey] }));
+    setOpenGroupSections(prev => ({ ...prev, [groupKey]: prev[groupKey] === undefined ? !groupKey.endsWith('-Ungrouped') : !prev[groupKey] }));
   };
 
   const handleDragStart = (e: any, userId: string, userName: string) => {
@@ -226,58 +216,36 @@ function Admin() {
     e.dataTransfer.setData('userName', userName);
   };
 
-  const handleDrop = async (e: any, targetGroup: string) => {
+  // Update group only (within same class)
+  const handleDrop = async (e: any, targetClass: string, targetGroup: string) => {
     e.preventDefault();
-    const userName = e.dataTransfer.getData('userName');
-    const userToUpdate = users.find(u => u.name === userName);
-    
-    if (!userToUpdate) return;
-    
-    const newGroup = targetGroup === 'Ungrouped' ? '' : targetGroup;
-    
-    // Optimistic UI Update
-    setUsers(prev => prev.map(u => u.name === userName ? { ...u, group: newGroup } : u));
-    
-    // Backend Update
-    try {
-      const token = localStorage.getItem('auth_token');
-      await fetch(`https://api.questcity.cloud/myhamsteracademia/api/users/${userToUpdate._id}/group`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ group: newGroup })
-      });
-    } catch (err) {
-      console.error('Failed to update group:', err);
-    }
-  };
-
-  const handleDropClass = async (e: any, targetClass: string) => {
-    e.preventDefault();
-    e.stopPropagation();
     const userId = e.dataTransfer.getData('userId');
     const userName = e.dataTransfer.getData('userName');
     if (!userId) return;
 
     const newClass = targetClass === 'Unassigned' ? '' : targetClass;
+    const newGroup = targetGroup === 'Ungrouped' ? '' : targetGroup;
 
-    // Optimistic UI update
-    setUsers(prev => prev.map(u => u._id === userId ? { ...u, class: newClass } : u));
+    // Optimistic UI Update
+    setUsers(prev => prev.map(u => u._id === userId ? { ...u, class: newClass, group: newGroup } : u));
 
-    // Persist to backend
+    const token = localStorage.getItem('auth_token');
     try {
-      const token = localStorage.getItem('auth_token');
       await fetch(`https://api.questcity.cloud/myhamsteracademia/api/users/${userId}/class`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ class: newClass })
       });
+      await fetch(`https://api.questcity.cloud/myhamsteracademia/api/users/${userId}/group`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ group: newGroup })
+      });
     } catch (err) {
-      console.error('Failed to update class for', userName, err);
+      console.error('Failed to update user:', userName, err);
     }
   };
+
 
   const handleDragOver = (e: any) => {
     e.preventDefault();
@@ -304,19 +272,31 @@ function Admin() {
   );
 
   const renderClassSection = (className: string) => {
-    const usersInClass = users.filter(u => 
-      (className === 'Unassigned' ? !u.class : u.class === className) && 
+    const usersInClass = users.filter(u =>
+      (className === 'Unassigned' ? !u.class : u.class === className) &&
       u.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
     const isOpen = openSections[className as keyof typeof openSections];
-    const isGroupView = groupView[className as keyof typeof groupView];
 
     let content;
     if (usersInClass.length === 0) {
-      content = <div style={{ textAlign: 'center', padding: '20px 0', color: '#8f909c' }}>No users match the criteria.</div>;
-    } else if (!isGroupView) {
       content = (
-        <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
+        <div
+          onDragOver={handleDragOver}
+          onDrop={(e) => handleDrop(e, className, 'Ungrouped')}
+          style={{ textAlign: 'center', padding: '32px 0', color: '#8f909c', border: '2px dashed #444651', borderRadius: '8px' }}
+        >
+          Drop users here to add to {className}
+        </div>
+      );
+    } else if (!groupView) {
+      // Flat list — the whole grid is a class drop zone
+      content = (
+        <section
+          onDragOver={handleDragOver}
+          onDrop={(e) => handleDrop(e, className, 'Ungrouped')}
+          style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px', minHeight: '80px' }}
+        >
           {usersInClass.map((u, i) => renderUserCard(u, i))}
         </section>
       );
@@ -333,16 +313,19 @@ function Admin() {
 
       const renderGroupFoldout = (groupName: string, groupUsers: any[]) => {
         const groupKey = `${className}-${groupName}`;
-        const isGroupOpen = openGroupSections[groupKey] === true; // default closed
+        // Ungrouped open by default, others closed
+        const isGroupOpen = groupName === 'Ungrouped'
+          ? openGroupSections[groupKey] !== false
+          : openGroupSections[groupKey] === true;
 
         return (
-          <div 
+          <div
             key={groupKey}
             onDragOver={handleDragOver}
-            onDrop={(e) => { e.stopPropagation(); handleDrop(e, groupName); }}
+            onDrop={(e) => { e.stopPropagation(); handleDrop(e, className, groupName); }}
             style={{ backgroundColor: '#1d2025', borderRadius: '8px', border: '1px dashed #444651', overflow: 'hidden' }}
           >
-            <button 
+            <button
               onClick={() => toggleGroupSection(groupKey)}
               style={{ width: '100%', padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#23262b', border: 'none', cursor: 'pointer', outline: 'none' }}
             >
@@ -380,18 +363,18 @@ function Admin() {
 
     return (
       <div style={{ backgroundColor: '#191c21', borderRadius: '12px', overflow: 'hidden', border: '1px solid #272a30' }}>
-        {/* Class Drop Zone — sits on top, always visible */}
+        {/* Class header — also a drop zone for quick class assignment */}
         <div
           onDragOver={handleDragOver}
-          onDrop={(e) => handleDropClass(e, className)}
+          onDrop={(e) => handleDrop(e, className, 'Ungrouped')}
           style={{ display: 'flex', alignItems: 'center', backgroundColor: '#1d2025' }}
         >
-          <button 
+          <button
             onClick={() => toggleSection(className)}
             style={{ flex: 1, padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'transparent', border: 'none', cursor: 'pointer', outline: 'none' }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <h2 style={{ fontSize: '20px', fontWeight: 700, margin: 0, color: '#e0e2ea' }}>{className === 'Unassigned' ? '⚠ Unassigned' : className}</h2>
+              <h2 style={{ fontSize: '20px', fontWeight: 700, margin: 0, color: '#e0e2ea' }}>{className === 'Unassigned' ? '⚠️ Unassigned' : className}</h2>
               <span style={{ fontSize: '12px', fontWeight: 600, color: '#b6c4ff', backgroundColor: 'rgba(118, 141, 222, 0.2)', padding: '4px 8px', borderRadius: '4px' }}>{usersInClass.length} Users</span>
             </div>
             <span style={{ transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', fontSize: '16px', color: '#c5c5d3' }}>▼</span>
@@ -400,25 +383,6 @@ function Admin() {
 
         {isOpen && (
           <div style={{ padding: '20px', backgroundColor: '#191c21' }}>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: '20px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <span style={{ fontSize: '13px', color: isGroupView ? '#e0e2ea' : '#8f909c', fontWeight: 600, transition: 'color 0.2s' }}>Group View</span>
-                <button 
-                  onClick={() => toggleGroupView(className)}
-                  style={{ 
-                    width: '44px', height: '24px', borderRadius: '12px', 
-                    backgroundColor: isGroupView ? '#768dde' : '#272a30', 
-                    border: 'none', position: 'relative', cursor: 'pointer', transition: 'background-color 0.2s'
-                  }}
-                >
-                  <div style={{ 
-                    width: '18px', height: '18px', borderRadius: '50%', backgroundColor: '#fff', 
-                    position: 'absolute', top: '3px', left: isGroupView ? '23px' : '3px', transition: 'left 0.2s',
-                    boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
-                  }} />
-                </button>
-              </div>
-            </div>
             {content}
           </div>
         )}
@@ -441,8 +405,19 @@ function Admin() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <h1 style={{ fontSize: '20px', fontWeight: 600, margin: 0, color: '#e0e2ea' }}>User Management</h1>
         </div>
-        <div style={{ width: '32px', height: '32px', borderRadius: '50%', overflow: 'hidden', border: '1px solid #444651' }}>
-          <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7tJGS7fdTyrmWAVD8MklMhf-KNzZxMb8u_0dXZuwiVWNpKX1_xOGQCh6b4RCFO7BU70FeQJGjZqwYJLxAZ8fuLGdp7igfuUUMG9yWV_72ZIguuetdGL9hoKaJC5fKU0FDx_F3_4aNkUJSumLf1b5yEn-r2sYbXjSGgyO3XYUNtg4lT3agzek5OpKG6-epHSbZmvdql7UGHKFwfEOlcDVMGiqDtAcIEStOLE1ecRHXOzKcYKDcxyQmC7SdW5ULwEsyuEWbCw3RfHPk" alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <span style={{ fontSize: '13px', color: groupView ? '#e0e2ea' : '#8f909c', fontWeight: 600, transition: 'color 0.2s' }}>Group View</span>
+            <button
+              onClick={() => setGroupView(v => !v)}
+              style={{ width: '44px', height: '24px', borderRadius: '12px', backgroundColor: groupView ? '#768dde' : '#444651', border: 'none', position: 'relative', cursor: 'pointer', transition: 'background-color 0.2s', flexShrink: 0 }}
+            >
+              <div style={{ width: '18px', height: '18px', borderRadius: '50%', backgroundColor: '#fff', position: 'absolute', top: '3px', left: groupView ? '23px' : '3px', transition: 'left 0.2s', boxShadow: '0 2px 4px rgba(0,0,0,0.2)' }} />
+            </button>
+          </div>
+          <div style={{ width: '32px', height: '32px', borderRadius: '50%', overflow: 'hidden', border: '1px solid #444651' }}>
+            <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7tJGS7fdTyrmWAVD8MklMhf-KNzZxMb8u_0dXZuwiVWNpKX1_xOGQCh6b4RCFO7BU70FeQJGjZqwYJLxAZ8fuLGdp7igfuUUMG9yWV_72ZIguuetdGL9hoKaJC5fKU0FDx_F3_4aNkUJSumLf1b5yEn-r2sYbXjSGgyO3XYUNtg4lT3agzek5OpKG6-epHSbZmvdql7UGHKFwfEOlcDVMGiqDtAcIEStOLE1ecRHXOzKcYKDcxyQmC7SdW5ULwEsyuEWbCw3RfHPk" alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          </div>
         </div>
       </header>
 
