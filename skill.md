@@ -15,3 +15,7 @@
 - Replaced frontend UI with a Discord login page styling.
 - Added Discord SVG logo and brand colors.
 - Implemented "Log in with Discord" button.
+
+## Commit: Use pm2 to run frontend and backend
+- Replaced concurrently with pm2 in root package.json.
+- Created ecosystem.config.js to manage frontend (Vite) and backend (Express) processes.
