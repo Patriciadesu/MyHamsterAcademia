@@ -151,12 +151,32 @@ function Main() {
 
 function Admin() {
   const navigate = useNavigate();
+  const [selectedClass, setSelectedClass] = useState('');
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', backgroundColor: '#36393f', color: '#ffffff' }}>
-      <div style={{ backgroundColor: '#2f3136', padding: '50px', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', textAlign: 'center', width: '500px' }}>
-        <h1 style={{ marginBottom: '30px', fontSize: '32px' }}>Admin Panel</h1>
-        <p style={{ color: '#b9bbbe', marginBottom: '40px' }}>Welcome to the admin dashboard. This area is under construction.</p>
+      <div style={{ backgroundColor: '#2f3136', padding: '40px', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', textAlign: 'center', width: '600px', maxHeight: '90vh', overflowY: 'auto' }}>
+        <h1 style={{ marginBottom: '20px', fontSize: '32px' }}>Admin Panel</h1>
         
+        <div style={{ backgroundColor: '#202225', padding: '20px', borderRadius: '8px', marginTop: '20px', marginBottom: '30px', textAlign: 'left' }}>
+          <h2 style={{ fontSize: '20px', marginBottom: '15px', color: '#ffffff' }}>User Management</h2>
+          <label style={{ display: 'flex', alignItems: 'center', marginBottom: '15px', color: '#b9bbbe', fontWeight: 'bold' }}>
+            Filter by Class:
+            <select 
+              value={selectedClass}
+              onChange={(e) => setSelectedClass(e.target.value)}
+              style={{ marginLeft: '15px', padding: '8px', backgroundColor: '#36393f', color: 'white', border: '1px solid #000000', borderRadius: '4px', outline: 'none', cursor: 'pointer' }}
+            >
+              <option value="">All Classes</option>
+              <option value="Starway">Starway</option>
+              <option value="NSC">NSC</option>
+            </select>
+          </label>
+          <div style={{ backgroundColor: '#2f3136', padding: '20px', borderRadius: '4px', border: '1px solid #40444b', minHeight: '100px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <p style={{ color: '#8e9297', fontSize: '14px', margin: 0 }}>Select a class to view users.</p>
+          </div>
+        </div>
+
         <button 
           onClick={() => navigate('/main')}
           style={{ 
@@ -167,7 +187,8 @@ function Admin() {
             borderRadius: '4px', 
             cursor: 'pointer',
             fontWeight: 'bold',
-            transition: 'background-color 0.2s'
+            transition: 'background-color 0.2s',
+            width: '100%'
           }}
           onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#686d73'}
           onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#4f545c'}

@@ -103,7 +103,8 @@ app.get('/api/auth/discord/callback', async (req, res) => {
         discriminator: discordUser.discriminator,
         avatar: discordUser.avatar,
         email: discordUser.email,
-        role: role
+        role: role,
+        class: role === 'admin' ? 'Staff' : undefined
       });
       await user.save();
       console.log(`New user registered: ${user.username} with role ${role}`);
@@ -113,6 +114,9 @@ app.get('/api/auth/discord/callback', async (req, res) => {
       user.avatar = discordUser.avatar;
       user.email = discordUser.email;
       user.role = role; // Update role in case it changed
+      if (role === 'admin') {
+        user.class = 'Staff';
+      }
       await user.save();
       console.log(`Existing user logged in: ${user.username} with role ${role}`);
     }

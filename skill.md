@@ -68,3 +68,8 @@
 - Backend now queries Discord API to check if logging in user has the admin role in the specified guild.
 - Updated frontend to conditionally display an "Admin Panel" button if user.role === 'admin'.
 - Added a blank /admin page with a return button.
+
+## Commit: Update Admin Page & Class Logic
+- Converted class property in User model to Enum: 'Starway', 'NSC', 'Staff'.
+- Backend now automatically assigns 'Staff' class to users who log in with the admin role.
+- Updated frontend Admin page to include a User Management section with a filterable Class dropdown.
