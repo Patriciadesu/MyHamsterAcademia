@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>User Management Backoffice</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=Geist:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "error-container": "#93000a",
+                        "outline": "#8f909c",
+                        "primary-fixed": "#dce1ff",
+                        "on-primary-fixed-variant": "#28418e",
+                        "secondary-container": "#47494e",
+                        "on-tertiary-container": "#4f3d00",
+                        "primary-container": "#768dde",
+                        "inverse-primary": "#425aa7",
+                        "secondary-fixed-dim": "#c5c6cc",
+                        "surface-bright": "#36393f",
+                        "tertiary-container": "#cca732",
+                        "error": "#ffb4ab",
+                        "surface-container-low": "#191c21",
+                        "on-tertiary-fixed": "#241a00",
+                        "inverse-on-surface": "#2d3036",
+                        "inverse-surface": "#e0e2ea",
+                        "on-secondary-fixed-variant": "#45474c",
+                        "on-error-container": "#ffdad6",
+                        "primary": "#b6c4ff",
+                        "on-surface-variant": "#c5c5d3",
+                        "surface-container-high": "#272a30",
+                        "on-primary-container": "#00226e",
+                        "surface-tint": "#b6c4ff",
+                        "surface-container": "#1d2025",
+                        "on-secondary-fixed": "#191c20",
+                        "on-background": "#e0e2ea",
+                        "tertiary-fixed-dim": "#eac24b",
+                        "on-tertiary-fixed-variant": "#584400",
+                        "on-primary": "#092977",
+                        "on-surface": "#e0e2ea",
+                        "tertiary": "#eac24b",
+                        "surface-variant": "#32353b",
+                        "on-error": "#690005",
+                        "surface-dim": "#101419",
+                        "on-secondary-container": "#b7b8be",
+                        "background": "#101419",
+                        "surface": "#101419",
+                        "primary-fixed-dim": "#b6c4ff",
+                        "surface-container-highest": "#32353b",
+                        "secondary": "#c5c6cc",
+                        "on-secondary": "#2e3035",
+                        "outline-variant": "#444651",
+                        "secondary-fixed": "#e2e2e8",
+                        "on-primary-fixed": "#00164f",
+                        "surface-container-lowest": "#0b0e13",
+                        "tertiary-fixed": "#ffe08b",
+                        "on-tertiary": "#3d2f00"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xs": "4px",
+                        "sm": "12px",
+                        "base": "8px",
+                        "lg": "24px",
+                        "gutter": "16px",
+                        "margin-mobile": "16px",
+                        "md": "16px",
+                        "xl": "32px",
+                        "margin-desktop": "24px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["Geist"],
+                        "headline-lg": ["Inter"],
+                        "headline-xl": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "label-sm": ["Geist"],
+                        "body-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "headline-lg": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "headline-xl": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "label-sm": ["11px", {"lineHeight": "14px", "fontWeight": "500"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #36393f; /* Force the Discord-style background as requested */
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #1e2124;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #4f545c;
+            border-radius: 10px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-background antialiased custom-scrollbar">
+<!-- TopAppBar -->
+<header class="w-full h-16 sticky top-0 bg-surface-container-high dark:bg-surface-container-high flex justify-between items-center px-gutter w-full z-40 md:pl-72">
+<div class="flex items-center gap-sm cursor-pointer active:opacity-80">
+<span class="material-symbols-outlined text-primary dark:text-primary" data-icon="menu">menu</span>
+<h1 class="font-headline-md text-headline-md font-bold text-on-surface dark:text-on-surface">User Management</h1>
+</div>
+<div class="cursor-pointer active:opacity-80">
+<div class="w-8 h-8 rounded-full overflow-hidden border border-outline-variant">
+<img alt="Admin Avatar" class="w-full h-full object-cover" data-alt="A professional headshot of a high-tech system administrator avatar, set against a sleek dark minimalist background with subtle blue neon highlights. The character has a modern digital artist aesthetic, wearing stylized tech-wear with a neutral expression. The visual style is crisp and high-contrast, echoing a premium dark-mode corporate software interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7tJGS7fdTyrmWAVD8MklMhf-KNzZxMb8u_0dXZuwiVWNpKX1_xOGQCh6b4RCFO7BU70FeQJGjZqwYJLxAZ8fuLGdp7igfuUUMG9yWV_72ZIguuetdGL9hoKaJC5fKU0FDx_F3_4aNkUJSumLf1b5yEn-r2sYbXjSGgyO3XYUNtg4lT3agzek5OpKG6-epHSbZmvdql7UGHKFwfEOlcDVMGiqDtAcIEStOLE1ecRHXOzKcYKDcxyQmC7SdW5ULwEsyuEWbCw3RfHPk"/>
+</div>
+</div>
+</header>
+<main class="flex flex-col min-h-[calc(100vh-128px)] px-margin-mobile py-lg gap-lg pb-32">
+<!-- Search and Filter Section -->
+<section class="flex flex-col gap-md">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none" data-icon="search">search</span>
+<input class="w-full h-12 pl-12 pr-4 bg-surface-container-low border-none rounded-lg font-body-md text-body-md text-on-surface placeholder:text-outline focus:ring-2 focus:ring-primary-container outline-none transition-all" placeholder="Search for users..." type="text"/>
+</div>
+<div class="flex flex-col gap-xs">
+<label class="font-label-md text-label-md text-on-surface-variant px-1">Class</label>
+<div class="relative">
+<select class="w-full h-12 pl-4 pr-10 bg-surface-container-low border-none rounded-lg font-body-md text-body-md text-on-surface appearance-none focus:ring-2 focus:ring-primary-container outline-none">
+<option>All Classes</option>
+<option>Starway</option>
+<option>NSC</option>
+</select>
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none" data-icon="expand_more">expand_more</span>
+</div>
+</div>
+</section>
+<!-- User List Heading -->
+<div class="flex justify-between items-center px-1">
+<h2 class="font-headline-md text-headline-md text-on-surface">Active Directory</h2>
+<span class="font-label-md text-label-md text-primary bg-primary-container/20 px-2 py-1 rounded">12 Users</span>
+</div>
+<!-- User Cards List -->
+<section class="flex flex-col gap-sm">
+<!-- Card 1 -->
+<div class="bg-surface-container border border-outline-variant/10 rounded-xl p-md flex items-center justify-between hover:bg-surface-container-highest transition-colors active:scale-[0.98]">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 rounded-lg overflow-hidden bg-surface-container-low flex items-center justify-center">
+<img alt="Alex" class="w-full h-full object-cover" data-alt="A portrait of a young male professional with a friendly smile, rendered as a clean vector avatar. He is wearing a dark navy polo shirt. The background is a flat, deep slate gray that matches a sophisticated dark UI. The lighting is soft and uniform, creating a modern, tech-focused corporate identity style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBImaEad57FWQDvnwqLZAqvVKWlA6y7J2f-vo0jq-hRduSdYu_e5wBwmAIhBWwS6ONpI4_yNKmIsj_PveP78KIETXyGP1DRL0UCr931-drf7PsCI-gS__AViWvCxCg9G1KSiXTbzPPZKB9AemyNc-aLPxXaVPqMY03YtYfkVHv_YGAU-2GJPrZ_BEhuiqNw6nz_fpfsitlaNsGKYJjdNGiRJbvTG8Ub-ZCVjr2VOnyW8Aghvv5CgJeEvPA0K9OwrCb4q5J9CWtf560d"/>
+</div>
+<div class="flex flex-col">
+<span class="font-headline-md text-body-lg font-bold text-on-surface">Alex Rivera</span>
+<div class="flex gap-2 mt-1">
+<span class="font-label-sm text-label-sm bg-surface-container-highest text-on-surface-variant px-2 py-0.5 rounded">Administrator</span>
+<span class="font-label-sm text-label-sm text-primary">Starway</span>
+</div>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline" data-icon="chevron_right">chevron_right</span>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-container border border-outline-variant/10 rounded-xl p-md flex items-center justify-between hover:bg-surface-container-highest transition-colors active:scale-[0.98]">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 rounded-lg overflow-hidden bg-surface-container-low flex items-center justify-center">
+<img alt="Jordan" class="w-full h-full object-cover" data-alt="A stylish female professional avatar with glasses and a confident expression. She has short, neatly styled hair and is wearing a sleek gray blazer. The composition is centered on a deep charcoal background, designed for a high-density professional dashboard. The visual style uses sharp lines and vibrant, high-contrast details." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBjC-hxQ5DIJKaejVVgeUP2qNUJ0AhqLhsHB4dCv7O60SPE61OLJI9JldrgobVu8fBDrZufw_Sj9Q326GKSJbeo1xncAOWLmeei1V5oYVrEgFVgRKSxx7ItJHvxzarsGhKekEOx2dH7bRaOgh3dwQ_ct8EkCqKQWTiAp9O7V7ApEKF5gj_srDIu_ufRZ2PZzECAFZ1Jl4GoYEGaYCSi1Mz-aTPLKfNaPSW0sJu-pIaib6eC_vQIWm6vTHh1IBQuhPI9hhtj42nhus-0"/>
+</div>
+<div class="flex flex-col">
+<span class="font-headline-md text-body-lg font-bold text-on-surface">Jordan Chen</span>
+<div class="flex gap-2 mt-1">
+<span class="font-label-sm text-label-sm bg-surface-container-highest text-on-surface-variant px-2 py-0.5 rounded">Moderator</span>
+<span class="font-label-sm text-label-sm text-tertiary">NSC</span>
+</div>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline" data-icon="chevron_right">chevron_right</span>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface-container border border-outline-variant/10 rounded-xl p-md flex items-center justify-between hover:bg-surface-container-highest transition-colors active:scale-[0.98]">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 rounded-lg overflow-hidden bg-surface-container-low flex items-center justify-center">
+<img alt="Sarah" class="w-full h-full object-cover" data-alt="A digital avatar of a diverse female software engineer with a thoughtful gaze. She is wearing a modern tech-hoodie in a muted indigo color. The artwork is presented against a dark, minimalist surface background that integrates perfectly with a pro-tool software environment. The overall mood is focused, professional, and contemporary." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBHDasXk9Y5tTv4TN9qnC-6TiofwhEdN1rJ7MAVanqHFf_eZ5Sc6xbHwSxp2hHWD-UJyxfIPymN-A3tlB6QQ3zlKht57Bn0uv-ozCl-L7xKZwUryQvldeKfFQCOQckASX-dMMnSVXxZ00a8J8zE0cnw-jyItN8ym-THlZEZqW0R2_61HM0Vc5I67Y7CNkVdhWvbVTXYYsxYvvgokBAa6X7fr6fDLfxVKBaoRyd0c5eC0VOBJT-hNS3up2jkLV2W07N1V2eBte3EHXjz"/>
+</div>
+<div class="flex flex-col">
+<span class="font-headline-md text-body-lg font-bold text-on-surface">Sarah Jenkins</span>
+<div class="flex gap-2 mt-1">
+<span class="font-label-sm text-label-sm bg-surface-container-highest text-on-surface-variant px-2 py-0.5 rounded">Support</span>
+<span class="font-label-sm text-label-sm text-primary">Starway</span>
+</div>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline" data-icon="chevron_right">chevron_right</span>
+</div>
+<!-- Card 4 -->
+<div class="bg-surface-container border border-outline-variant/10 rounded-xl p-md flex items-center justify-between hover:bg-surface-container-highest transition-colors active:scale-[0.98]">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 rounded-lg overflow-hidden bg-surface-container-low flex items-center justify-center">
+<img alt="Marcus" class="w-full h-full object-cover" data-alt="A friendly male customer success manager avatar with a beard and a warm smile. He is wearing a dark grey sweater. The background is a clean, dark surface-container color, ideal for a modern CRM or management application. The illustration style is professional, featuring clean geometric shapes and high legibility." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCiUpNMiB2cxltQ6UGv7IqSVQ6BRpb5flOBbjOeHtyOXaY6-5G_xDMtIPSt2eUccClBWGvKpgrDqOvbNsvIwLdjFEwZQcPSSJQArFeOiBhVEBbwVZnrgI4xhokHRzSsnIPu_-qpTqY1kaHUQ21fKgA0-OmZp3tXLfvvU0VHFkIFY3Q_rhUTA3_kzl5gnes0N5zhR7Z_A5uIZsCxnjO7tefVOXsEgsnibF7w7PM6g3mGFI3vyKU05ic0IF1Fx9S2tmk9PCO9zUt8m0iy"/>
+</div>
+<div class="flex flex-col">
+<span class="font-headline-md text-body-lg font-bold text-on-surface">Marcus Thorne</span>
+<div class="flex gap-2 mt-1">
+<span class="font-label-sm text-label-sm bg-surface-container-highest text-on-surface-variant px-2 py-0.5 rounded">User</span>
+<span class="font-label-sm text-label-sm text-tertiary">NSC</span>
+</div>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline" data-icon="chevron_right">chevron_right</span>
+</div>
+</section>
+<!-- Return to Main Menu Button -->
+<button class="w-full mt-xl py-4 bg-primary-container text-on-primary-container font-headline-md text-body-lg font-bold rounded-xl flex items-center justify-center gap-base active:scale-95 transition-transform">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+            Return to Main Menu
+        </button>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full h-16 md:hidden bg-surface-container-lowest dark:bg-surface-container-lowest flex justify-around items-center px-4 z-50 shadow-lg">
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant active:bg-surface-container-highest transition-transform duration-150 active:scale-90">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-label-sm text-label-sm">Dashboard</span>
+</div>
+<div class="flex flex-col items-center justify-center text-primary dark:text-primary bg-primary-container/20 dark:bg-primary-container/20 rounded-full px-4 py-1 active:bg-surface-container-highest transition-transform duration-150 active:scale-90">
+<span class="material-symbols-outlined" data-icon="group" style="font-variation-settings: 'FILL' 1;">group</span>
+<span class="font-label-sm text-label-sm">Users</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant active:bg-surface-container-highest transition-transform duration-150 active:scale-90">
+<span class="material-symbols-outlined" data-icon="list_alt">list_alt</span>
+<span class="font-label-sm text-label-sm">Audit</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant active:bg-surface-container-highest transition-transform duration-150 active:scale-90">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-label-sm text-label-sm">Settings</span>
+</div>
+</nav>
+</body></html>
