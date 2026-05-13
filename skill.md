@@ -249,3 +249,10 @@
 - Added an immediate status fetch after the trigger API call to eliminate the 3-second polling delay.
 - Rewrote the timer calculation logic to be more robust, using absolute timestamps (`timerStartedAt`) and adding a fallback for `timerDuration`.
 - Fixed a bug where `timeLeft` could become `NaN` if the duration field was missing from the initial state.
+
+## Commit: Switch to Unix timestamps and add debug footer
+- Converted `timerStartedAt` from a Date object to a Unix timestamp (Number) in the database and API.
+- This eliminates all timezone-related issues and clock skew between the server and the browser.
+- Simplified the `useEffect` timer logic to use direct numeric subtraction.
+- Added a temporary debug footer at the bottom of the Main dashboard to display the current state of `showStatus` and `user.group` for troubleshooting.
+- Simplified conditional rendering to ensure that if a show is active, either the timer or the stock chart is always displayed.

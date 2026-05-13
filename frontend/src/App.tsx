@@ -111,7 +111,7 @@ function Main() {
   useEffect(() => {
     let interval: any;
     if (showStatus?.status === 'timer_running' && showStatus.timerStartedAt) {
-      const start = new Date(showStatus.timerStartedAt).getTime();
+      const start = Number(showStatus.timerStartedAt);
       const duration = (showStatus.timerDuration || 120) * 1000;
       
       const tick = () => {
@@ -321,6 +321,8 @@ function Main() {
 
       {/* Center: Show Manager Interaction */}
       <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px' }}>
+        
+        {/* Waiting for group to click start */}
         {showStatus?.status === 'waiting_for_group' && showStatus.activeClass === user.class && showStatus.currentGroupName === user.group && (
           <button
             onClick={async () => {
@@ -331,7 +333,6 @@ function Main() {
                   headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (res.ok) {
-                  // Refresh status immediately
                   const statusRes = await fetch('https://api.questcity.cloud/myhamsteracademia/api/show/status');
                   const statusData = await statusRes.json();
                   setShowStatus(statusData);
@@ -345,33 +346,34 @@ function Main() {
               backgroundColor: '#57c4a0', color: '#fff', border: 'none', cursor: 'pointer',
               boxShadow: '0 0 40px rgba(87, 196, 160, 0.4)', transition: 'transform 0.1s'
             }}
-            onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.95)'}
-            onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
           >
             START SHOW
           </button>
         )}
 
-        {showStatus?.status === 'timer_running' && showStatus.activeClass === user.class && showStatus.currentGroupName === user.group && timeLeft !== null && (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
-            <span style={{ fontSize: '18px', fontWeight: 700, color: '#8f909c', textTransform: 'uppercase' }}>Show Time</span>
-            <div style={{ fontSize: '120px', fontWeight: 900, color: timeLeft < 30 ? '#ed4245' : '#e0e2ea', lineHeight: 1, fontFamily: 'monospace' }}>
-              {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
+        {/* Timer is running */}
+        {showStatus?.status === 'timer_running' && (
+          showStatus.currentGroupName === user.group ? (
+            // Active group sees timer
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+              <span style={{ fontSize: '18px', fontWeight: 700, color: '#8f909c', textTransform: 'uppercase' }}>Show Time</span>
+              <div style={{ fontSize: '120px', fontWeight: 900, color: (timeLeft || 0) < 30 ? '#ed4245' : '#e0e2ea', lineHeight: 1, fontFamily: 'monospace' }}>
+                {timeLeft !== null ? `${Math.floor(timeLeft / 60)}:${(timeLeft % 60).toString().padStart(2, '0')}` : '--:--'}
+              </div>
             </div>
-          </div>
-        )}
-
-        {showStatus?.status === 'timer_running' && showStatus.currentGroupName !== user.group && (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '32px' }}>
-             <div style={{ textAlign: 'center' }}>
-               <span style={{ fontSize: '14px', fontWeight: 800, color: '#faa61a', textTransform: 'uppercase', letterSpacing: '2px', backgroundColor: 'rgba(250, 166, 26, 0.1)', padding: '6px 20px', borderRadius: '30px' }}>
-                 Ongoing Show
-               </span>
-               <h2 style={{ fontSize: '32px', fontWeight: 900, color: '#e0e2ea', margin: '16px 0 8px 0' }}>Group {showStatus.currentGroupName} is Live</h2>
-               <p style={{ margin: 0, color: '#8f909c', fontSize: '16px' }}>Please wait for your turn. Analyzing market trends...</p>
-             </div>
-             <StockChart />
-          </div>
+          ) : (
+            // Other groups see stock chart
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '32px' }}>
+               <div style={{ textAlign: 'center' }}>
+                 <span style={{ fontSize: '14px', fontWeight: 800, color: '#faa61a', textTransform: 'uppercase', letterSpacing: '2px', backgroundColor: 'rgba(250, 166, 26, 0.1)', padding: '6px 20px', borderRadius: '30px' }}>
+                   Ongoing Show
+                 </span>
+                 <h2 style={{ fontSize: '32px', fontWeight: 900, color: '#e0e2ea', margin: '16px 0 8px 0' }}>Group {showStatus.currentGroupName} is Live</h2>
+                 <p style={{ margin: 0, color: '#8f909c', fontSize: '16px' }}>Please wait for your turn. Analyzing market trends...</p>
+               </div>
+               <StockChart />
+            </div>
+          )
         )}
 
         {showStatus?.status === 'idle' && (
@@ -379,6 +381,18 @@ function Main() {
             NO SHOW ACTIVE
           </div>
         )}
+        
+        {/* If status is waiting but NOT user's group */}
+        {showStatus?.status === 'waiting_for_group' && (showStatus.activeClass !== user.class || showStatus.currentGroupName !== user.group) && (
+          <div style={{ textAlign: 'center', opacity: 0.5 }}>
+            <span style={{ fontSize: '14px', fontWeight: 700, color: '#8f909c' }}>WAITING FOR GROUP {showStatus.currentGroupName} TO START</span>
+          </div>
+        )}
+      </div>
+
+      {/* Debug Footer (Temporary) */}
+      <div style={{ position: 'absolute', bottom: '10px', left: '0', width: '100%', textAlign: 'center', fontSize: '10px', color: '#444651', pointerEvents: 'none' }}>
+        Status: {showStatus?.status || 'none'} | Group: {user.group || 'none'} | Active: {showStatus?.currentGroupName || 'none'}
       </div>
 
     </div>

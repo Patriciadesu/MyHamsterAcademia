@@ -368,7 +368,7 @@ app.post('/api/show/trigger-timer', async (req, res) => {
     }
 
     state.status = 'timer_running';
-    state.timerStartedAt = new Date();
+    state.timerStartedAt = Date.now(); // Store as number (Unix timestamp)
     await state.save();
 
     res.json({ success: true, state });
