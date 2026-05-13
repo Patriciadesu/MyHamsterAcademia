@@ -57,3 +57,7 @@
 - Installed mongoose.
 - Created User model to store discordId, username, discriminator, avatar, and email.
 - Updated server.js to connect to MongoDB and automatically register or update users during the Discord OAuth callback.
+
+## Commit: Update User schema
+- User manually added class, group, and coin properties to User model.
+- Added role Enum (user/admin) with default value 'user' to User model.
