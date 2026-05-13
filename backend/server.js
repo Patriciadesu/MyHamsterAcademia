@@ -7,6 +7,7 @@ const mongoose = require('mongoose');
 
 const User = require('./models/User');
 const Group = require('./models/Group');
+const ClassQueue = require('./models/ClassQueue');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -227,6 +228,18 @@ app.get('/api/groups', requireAdmin, async (req, res) => {
   }
 });
 
+// Get current saved queue for a class
+app.get('/api/groups/queue/:class', requireAdmin, async (req, res) => {
+  try {
+    const targetClass = req.params.class;
+    const saved = await ClassQueue.findOne({ class: targetClass });
+    if (!saved) return res.json({ class: targetClass, queue: [] });
+    res.json({ class: saved.class, queue: saved.queue, lastRandomized: saved.lastRandomized });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch queue' });
+  }
+});
+
 // Randomize group ORDER for a specific class (which group goes first, not users within group)
 app.post('/api/groups/randomize-class', requireAdmin, async (req, res) => {
   try {
@@ -265,6 +278,13 @@ app.post('/api/groups/randomize-class', requireAdmin, async (req, res) => {
         memberCount: members.length,
       };
     });
+
+    // Persist the result to ClassQueue
+    await ClassQueue.findOneAndUpdate(
+      { class: targetClass },
+      { class: targetClass, queue: result, lastRandomized: new Date() },
+      { upsert: true, new: true }
+    );
 
     res.json({ class: targetClass, queue: result });
   } catch (err) {

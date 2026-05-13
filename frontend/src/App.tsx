@@ -482,7 +482,20 @@ function Admin() {
               {(['Staff', 'Starway', 'NSC'] as const).map(cls => (
                 <button
                   key={cls}
-                  onClick={() => { setSelectedClass(cls); setRandomQueues([]); }}
+                  onClick={async () => {
+                    setSelectedClass(cls);
+                    setRandomQueues([]);
+                    try {
+                      const token = localStorage.getItem('auth_token');
+                      const res = await fetch(`https://api.questcity.cloud/myhamsteracademia/api/groups/queue/${cls}`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                      });
+                      const data = await res.json();
+                      setRandomQueues(data.queue || []);
+                    } catch (err) {
+                      console.error(err);
+                    }
+                  }}
                   style={{
                     padding: '10px 28px', borderRadius: '10px', border: '2px solid',
                     borderColor: selectedClass === cls ? '#768dde' : '#444651',

@@ -162,3 +162,10 @@
 - Red button is greyed out and disabled when no class is selected.
 - Results display a vertical numbered list: 🥇🥈🥉 medals for top 3, "GOES FIRST" badge on position 1.
 - Selecting a new class clears the previous result.
+
+## Commit: Show current queue on class select in Random Queue
+- Created backend/models/ClassQueue.js to persist the group order per class with fields: class, queue[], lastRandomized.
+- Updated POST /api/groups/randomize-class to save the shuffled result to ClassQueue (upsert).
+- Added GET /api/groups/queue/:class endpoint to retrieve the last saved queue for a class.
+- Selecting a class button now immediately fetches and displays the current saved queue from the database.
+- If no queue has been randomized yet for that class, result area remains empty until RANDOM is pressed.
