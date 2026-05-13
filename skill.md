@@ -86,3 +86,8 @@
 - Completely overhauled the list architecture: Removed the global class filter and replaced it with dedicated, independent foldout sections for each class ("Starway", "NSC").
 - Both class sections can remain open simultaneously.
 - Integrated the user search input so it securely filters users within whichever class sections are currently open.
+
+## Commit: Implement Group View switch in foldouts
+- Created an elegant toggle switch specifically inside each class foldout titled "Group View".
+- When toggled on, the application dynamically restructures the grid to section users off by their dedicated `group` variables, creating categorized sub-grids.
+- Handled edge cases by automatically grouping users without a group variable into an "Ungrouped" section pinned to the bottom of the foldout.
