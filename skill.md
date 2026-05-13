@@ -180,3 +180,10 @@
 - Class badge color is unique per class: Starway = blue, NSC = teal, Staff = gold.
 - Avatar border color matches the class color.
 - Users with no class assigned show a grey "No Class" label.
+
+## Commit: Add group queue position to Main page top-right
+- Added a top-right banner card on the Main page that displays the user's group queue position.
+- Fetches the current class queue from /api/groups/queue/:class on mount.
+- Displays position with ordinal suffix (e.g., 1st, 2nd, 3rd) and the group name.
+- If the group has no randomized queue position or the user is unassigned, it displays "—".
+- Uses a premium glassmorphism style consistent with the user banner.

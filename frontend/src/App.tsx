@@ -44,6 +44,7 @@ function Login() {
 
 function Main() {
   const [user, setUser] = useState<any>(null);
+  const [queuePosition, setQueuePosition] = useState<number | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -73,6 +74,18 @@ function Main() {
           navigate('/');
         } else {
           setUser(data);
+          // Fetch queue position if user has a class and group
+          if (data.class && data.group) {
+            fetch(`https://api.questcity.cloud/myhamsteracademia/api/groups/queue/${data.class}`, {
+              headers: { 'Authorization': `Bearer ${token}` }
+            })
+              .then(r => r.json())
+              .then(q => {
+                const found = (q.queue || []).find((item: any) => item.name === data.group);
+                setQueuePosition(found ? found.position : null);
+              })
+              .catch(() => {});
+          }
         }
       })
       .catch(err => console.error(err));
@@ -91,46 +104,59 @@ function Main() {
   };
   const classColor = classColors[user.class] || '#8f909c';
 
+  const ordinal = (n: number) => {
+    const s = ['th', 'st', 'nd', 'rd'];
+    const v = n % 100;
+    return n + (s[(v - 20) % 10] || s[v] || s[0]);
+  };
+
+  const bannerStyle: React.CSSProperties = {
+    backgroundColor: 'rgba(39, 42, 48, 0.85)',
+    backdropFilter: 'blur(12px)',
+    border: '1px solid rgba(68, 70, 81, 0.6)',
+    borderRadius: '16px',
+    padding: '14px 20px',
+    boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+  };
+
   return (
     <div style={{ width: '100%', height: '100%', backgroundColor: '#36393f', position: 'relative' }}>
-      {/* Top-left banner */}
-      <div style={{
-        position: 'absolute', top: '24px', left: '24px',
-        display: 'flex', alignItems: 'center', gap: '16px',
-        backgroundColor: 'rgba(39, 42, 48, 0.85)',
-        backdropFilter: 'blur(12px)',
-        border: '1px solid rgba(68, 70, 81, 0.6)',
-        borderRadius: '16px',
-        padding: '14px 20px',
-        boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
-      }}>
-        {/* Avatar */}
+
+      {/* Top-left: User banner */}
+      <div style={{ position: 'absolute', top: '24px', left: '24px', display: 'flex', alignItems: 'center', gap: '16px', ...bannerStyle }}>
         <div style={{ position: 'relative', flexShrink: 0 }}>
           <img
             src={avatarUrl}
             alt={user.username}
             style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: `2px solid ${classColor}` }}
           />
-          <div style={{
-            position: 'absolute', bottom: 0, right: 0,
-            width: '14px', height: '14px', borderRadius: '50%',
-            backgroundColor: '#57c44f', border: '2px solid #272a30'
-          }} />
+          <div style={{ position: 'absolute', bottom: 0, right: 0, width: '14px', height: '14px', borderRadius: '50%', backgroundColor: '#57c44f', border: '2px solid #272a30' }} />
         </div>
-        {/* Info */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
           <span style={{ fontSize: '16px', fontWeight: 700, color: '#e0e2ea', lineHeight: 1 }}>{user.username}</span>
           {user.class ? (
-            <span style={{
-              fontSize: '12px', fontWeight: 600, color: classColor,
-              backgroundColor: `${classColor}22`,
-              padding: '2px 10px', borderRadius: '20px', display: 'inline-block', marginTop: '2px'
-            }}>{user.class}</span>
+            <span style={{ fontSize: '12px', fontWeight: 600, color: classColor, backgroundColor: `${classColor}22`, padding: '2px 10px', borderRadius: '20px', display: 'inline-block', marginTop: '2px' }}>{user.class}</span>
           ) : (
             <span style={{ fontSize: '12px', color: '#8f909c' }}>No Class</span>
           )}
         </div>
       </div>
+
+      {/* Top-right: Queue position banner */}
+      <div style={{ position: 'absolute', top: '24px', right: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', ...bannerStyle }}>
+        <span style={{ fontSize: '11px', fontWeight: 600, color: '#8f909c', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '6px' }}>Queue</span>
+        {queuePosition !== null ? (
+          <>
+            <span style={{ fontSize: '40px', fontWeight: 900, color: queuePosition === 1 ? '#768dde' : '#e0e2ea', lineHeight: 1 }}>
+              {ordinal(queuePosition)}
+            </span>
+            <span style={{ fontSize: '12px', color: '#8f909c', marginTop: '4px' }}>Group {user.group}</span>
+          </>
+        ) : (
+          <span style={{ fontSize: '40px', fontWeight: 900, color: '#444651', lineHeight: 1 }}>—</span>
+        )}
+      </div>
+
     </div>
   );
 }
