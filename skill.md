@@ -27,3 +27,6 @@
 ## Commit: Host website at frontend URL
 - Updated Vite config to build for /myhamsteracademia/ base path and output to /var/www/myhamsteracademia.
 - Added Nginx location block for /myhamsteracademia/ pointing to the build directory.
+
+## Commit: Fix Nginx trailing slash routing
+- Added exact match location block to automatically redirect /myhamsteracademia to /myhamsteracademia/ so it doesn't return 404.
