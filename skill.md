@@ -35,3 +35,6 @@
 - Implemented Discord OAuth2 endpoints in the Express backend using axios and jsonwebtoken.
 - Added Nginx proxy for /myhamsteracademia/api/ to route to backend on port 3000.
 - Updated frontend to use React Router with a /main route showing user's Discord info after successful authentication.
+
+## Commit: Update Discord callback variable
+- Updated server.js to read from DISCORD_CALLBACK_URL environment variable as requested.
