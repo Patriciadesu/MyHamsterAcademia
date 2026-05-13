@@ -30,3 +30,8 @@
 
 ## Commit: Fix Nginx trailing slash routing
 - Added exact match location block to automatically redirect /myhamsteracademia to /myhamsteracademia/ so it doesn't return 404.
+
+## Commit: Make Discord login work and add main page
+- Implemented Discord OAuth2 endpoints in the Express backend using axios and jsonwebtoken.
+- Added Nginx proxy for /myhamsteracademia/api/ to route to backend on port 3000.
+- Updated frontend to use React Router with a /main route showing user's Discord info after successful authentication.

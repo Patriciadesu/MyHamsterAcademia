@@ -1,7 +1,9 @@
-function App() {
+import { useEffect, useState } from 'react'
+import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from 'react-router-dom'
+
+function Login() {
   const handleDiscordLogin = () => {
-    // In a real app, you would redirect to the Discord OAuth2 URL here.
-    alert('Redirecting to Discord login...');
+    window.location.href = 'https://api.questcity.cloud/myhamsteracademia/api/auth/discord/login';
   }
 
   return (
@@ -37,6 +39,98 @@ function App() {
         </button>
       </div>
     </div>
+  )
+}
+
+function Main() {
+  const [user, setUser] = useState<any>(null);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    // Check url for token
+    const params = new URLSearchParams(location.search);
+    const tokenFromUrl = params.get('token');
+    
+    if (tokenFromUrl) {
+      localStorage.setItem('auth_token', tokenFromUrl);
+      navigate('/main', { replace: true }); // clear url
+    }
+
+    const token = tokenFromUrl || localStorage.getItem('auth_token');
+    
+    if (!token) {
+      navigate('/');
+      return;
+    }
+
+    // Fetch user info
+    fetch('https://api.questcity.cloud/myhamsteracademia/api/auth/me', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.error) {
+          localStorage.removeItem('auth_token');
+          navigate('/');
+        } else {
+          setUser(data);
+        }
+      })
+      .catch(err => {
+        console.error(err);
+      });
+  }, [navigate, location]);
+
+  const handleLogout = () => {
+    localStorage.removeItem('auth_token');
+    navigate('/');
+  }
+
+  if (!user) {
+    return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#36393f', color: 'white' }}>Loading...</div>;
+  }
+
+  const avatarUrl = user.avatar 
+    ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
+    : `https://cdn.discordapp.com/embed/avatars/${parseInt(user.discriminator) % 5}.png`;
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', fontFamily: 'sans-serif', backgroundColor: '#36393f', color: '#ffffff' }}>
+      <div style={{ backgroundColor: '#2f3136', padding: '40px', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', textAlign: 'center', width: '350px' }}>
+        <img src={avatarUrl} alt="Avatar" style={{ borderRadius: '50%', width: '100px', height: '100px', marginBottom: '20px' }} />
+        <h2>{user.username}#{user.discriminator}</h2>
+        <p style={{ color: '#b9bbbe', marginTop: '10px' }}>{user.email}</p>
+        <button 
+          onClick={handleLogout}
+          style={{ 
+            backgroundColor: '#ed4245', 
+            color: 'white', 
+            border: 'none', 
+            padding: '10px 20px', 
+            borderRadius: '4px', 
+            marginTop: '20px',
+            cursor: 'pointer',
+            width: '100%'
+          }}
+        >
+          Logout
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function App() {
+  return (
+    <Router basename="/myhamsteracademia">
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route path="/main" element={<Main />} />
+      </Routes>
+    </Router>
   )
 }
 
