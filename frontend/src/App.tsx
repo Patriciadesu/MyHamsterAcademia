@@ -153,7 +153,7 @@ function Main() {
   };
 
   return (
-    <div style={{ width: '100%', height: '100%', backgroundColor: '#36393f', position: 'relative' }}>
+    <div style={{ width: '100vw', height: '100vh', backgroundColor: '#36393f', position: 'relative', overflow: 'hidden' }}>
 
       {/* Top-left: User banner */}
       <div style={{ position: 'absolute', top: '24px', left: '24px', display: 'flex', alignItems: 'center', gap: '16px', ...bannerStyle }}>
@@ -189,6 +189,62 @@ function Main() {
           <span style={{ fontSize: '40px', fontWeight: 900, color: '#444651', lineHeight: 1 }}>—</span>
         )}
       </div>
+
+      {/* Admin Panel Button (Top-left, below user banner) */}
+      {user.role === 'admin' && (
+        <button
+          onClick={() => navigate('/admin')}
+          style={{
+            position: 'absolute', top: '120px', left: '24px',
+            display: 'flex', alignItems: 'center', gap: '10px',
+            padding: '12px 24px', borderRadius: '12px',
+            backgroundColor: '#faa61a', color: '#fff',
+            border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: '14px',
+            boxShadow: '0 4px 15px rgba(250, 166, 26, 0.3)',
+            transition: 'all 0.2s',
+            zIndex: 100
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.backgroundColor = '#f19500';
+            e.currentTarget.style.transform = 'translateY(-2px)';
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.backgroundColor = '#faa61a';
+            e.currentTarget.style.transform = 'translateY(0)';
+          }}
+        >
+          <span style={{ fontSize: '18px' }}>⚙️</span>
+          ADMIN PANEL
+        </button>
+      )}
+
+      {/* Logout Button (Top-right, below queue banner) */}
+      <button
+        onClick={() => {
+          localStorage.removeItem('auth_token');
+          navigate('/');
+        }}
+        style={{
+          position: 'absolute', top: '140px', right: '24px',
+          display: 'flex', alignItems: 'center', gap: '10px',
+          padding: '12px 24px', borderRadius: '12px',
+          backgroundColor: 'rgba(237, 66, 69, 0.15)', color: '#ed4245',
+          border: '1px solid rgba(237, 66, 69, 0.3)', cursor: 'pointer', fontWeight: 700, fontSize: '14px',
+          transition: 'all 0.2s',
+          zIndex: 100
+        }}
+        onMouseOver={(e) => {
+          e.currentTarget.style.backgroundColor = 'rgba(237, 66, 69, 0.25)';
+          e.currentTarget.style.transform = 'translateY(-2px)';
+        }}
+        onMouseOut={(e) => {
+          e.currentTarget.style.backgroundColor = 'rgba(237, 66, 69, 0.15)';
+          e.currentTarget.style.transform = 'translateY(0)';
+        }}
+      >
+        <span style={{ fontSize: '18px' }}>🚪</span>
+        LOGOUT
+      </button>
 
       {/* Center: Show Manager Interaction */}
       <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px' }}>
@@ -232,62 +288,6 @@ function Main() {
           </div>
         )}
       </div>
-
-      {/* Bottom-left: Admin Panel Button (Admin only) */}
-      {user.role === 'admin' && (
-        <button
-          onClick={() => navigate('/admin')}
-          style={{
-            position: 'absolute', bottom: '24px', left: '24px',
-            display: 'flex', alignItems: 'center', gap: '10px',
-            padding: '12px 24px', borderRadius: '12px',
-            backgroundColor: '#faa61a', color: '#fff',
-            border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: '14px',
-            boxShadow: '0 4px 15px rgba(250, 166, 26, 0.3)',
-            transition: 'all 0.2s',
-            zIndex: 10
-          }}
-          onMouseOver={(e) => {
-            e.currentTarget.style.backgroundColor = '#f19500';
-            e.currentTarget.style.transform = 'translateY(-2px)';
-          }}
-          onMouseOut={(e) => {
-            e.currentTarget.style.backgroundColor = '#faa61a';
-            e.currentTarget.style.transform = 'translateY(0)';
-          }}
-        >
-          <span style={{ fontSize: '18px' }}>⚙️</span>
-          ADMIN PANEL
-        </button>
-      )}
-
-      {/* Bottom-right: Logout Button */}
-      <button
-        onClick={() => {
-          localStorage.removeItem('auth_token');
-          navigate('/');
-        }}
-        style={{
-          position: 'absolute', bottom: '24px', right: '24px',
-          display: 'flex', alignItems: 'center', gap: '10px',
-          padding: '12px 24px', borderRadius: '12px',
-          backgroundColor: 'rgba(237, 66, 69, 0.15)', color: '#ed4245',
-          border: '1px solid rgba(237, 66, 69, 0.3)', cursor: 'pointer', fontWeight: 700, fontSize: '14px',
-          transition: 'all 0.2s',
-          zIndex: 10
-        }}
-        onMouseOver={(e) => {
-          e.currentTarget.style.backgroundColor = 'rgba(237, 66, 69, 0.25)';
-          e.currentTarget.style.transform = 'translateY(-2px)';
-        }}
-        onMouseOut={(e) => {
-          e.currentTarget.style.backgroundColor = 'rgba(237, 66, 69, 0.15)';
-          e.currentTarget.style.transform = 'translateY(0)';
-        }}
-      >
-        <span style={{ fontSize: '18px' }}>🚪</span>
-        LOGOUT
-      </button>
 
     </div>
   );

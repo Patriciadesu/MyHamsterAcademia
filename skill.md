@@ -217,3 +217,11 @@
 - Updated backend /api/auth/me endpoint to include 'class' and 'group' fields, ensuring banners and queue logic work correctly.
 - Verified and fixed Admin Panel button visibility for users with the 'admin' role.
 - Styled Logout button with a subtle red outline and transparent background for a clean, premium look.
+
+## Commit: Move Admin Panel and Logout buttons to top and fix viewport height
+- Moved both buttons to the top of the Main page for better visibility:
+  - Admin Panel (⚙️): Now positioned top-left, directly below the user banner.
+  - Logout (🚪): Now positioned top-right, directly below the queue banner.
+- Changed the Main container to use viewport units (100vw/100vh) and overflow:hidden to ensure the background covers the entire screen and elements are not pushed off-page.
+- Increased z-index for both buttons to ensure they appear above other UI layers.
+- Fixed a syntax error in App.tsx that was causing build issues.
