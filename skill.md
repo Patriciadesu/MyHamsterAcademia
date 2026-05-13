@@ -206,3 +206,8 @@
   - Clicking "START SHOW" triggers a global 2-minute timer visible to the group members.
   - Timer turns red when less than 30 seconds remain.
   - Displays "NO SHOW ACTIVE" placeholder when idle.
+
+## Commit: Move Admin Panel button to bottom-left on Main page
+- Added an "ADMIN PANEL" button to the bottom-left of the Main page for users with the 'admin' role.
+- Styled the button with an orange accent color and a settings emoji (⚙️) to distinguish it from other UI elements.
+- Uses absolute positioning to keep it anchored in the corner of the premium dashboard.

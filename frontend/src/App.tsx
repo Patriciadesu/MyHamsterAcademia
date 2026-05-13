@@ -233,6 +233,34 @@ function Main() {
         )}
       </div>
 
+      {/* Bottom-left: Admin Panel Button (Admin only) */}
+      {user.role === 'admin' && (
+        <button
+          onClick={() => navigate('/admin')}
+          style={{
+            position: 'absolute', bottom: '24px', left: '24px',
+            display: 'flex', alignItems: 'center', gap: '10px',
+            padding: '12px 24px', borderRadius: '12px',
+            backgroundColor: '#faa61a', color: '#fff',
+            border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: '14px',
+            boxShadow: '0 4px 15px rgba(250, 166, 26, 0.3)',
+            transition: 'all 0.2s',
+            zIndex: 10
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.backgroundColor = '#f19500';
+            e.currentTarget.style.transform = 'translateY(-2px)';
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.backgroundColor = '#faa61a';
+            e.currentTarget.style.transform = 'translateY(0)';
+          }}
+        >
+          <span style={{ fontSize: '18px' }}>⚙️</span>
+          ADMIN PANEL
+        </button>
+      )}
+
     </div>
   );
 }
