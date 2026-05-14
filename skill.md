@@ -303,3 +303,9 @@
 - Changed the "natural" downward trend to strictly decrease by a fixed amount without randomness.
 - Changed the "Boost" upward trend to strictly rise by a fixed amount without randomness.
 - A Boost now lasts for exactly 10 fast ticks (~4 seconds) ensuring a massive and continuous, predictable visual spike.
+
+## Commit: Fix Stock Chart Reset Bug
+- Fixed a major React anti-pattern bug where `StockChart` was defined *inside* the `Main` component.
+- The previous architecture caused `StockChart` to completely unmount, reset its internal state to the `initData` default (475.5), and remount every single time the 1000ms show timer ticked.
+- Moved `StockChart` entirely outside of `Main` and passed the required variables as props. 
+- The stock chart is now fully persistent, holds its exact state, and no longer loops back to the beginning every second.

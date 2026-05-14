@@ -42,120 +42,6 @@ function Login() {
   )
 }
 
-function Main() {
-  const [user, setUser] = useState<any>(null);
-  const [queuePosition, setQueuePosition] = useState<number | null>(null);
-  const [showStatus, setShowStatus] = useState<any>(null);
-  const [timeLeft, setTimeLeft] = useState<number | null>(null);
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const tokenFromUrl = params.get('token');
-
-    if (tokenFromUrl) {
-      localStorage.setItem('auth_token', tokenFromUrl);
-      navigate('/main', { replace: true });
-    }
-
-    const token = tokenFromUrl || localStorage.getItem('auth_token');
-
-    if (!token) {
-      navigate('/');
-      return;
-    }
-
-    fetch('https://api.questcity.cloud/myhamsteracademia/api/auth/me', {
-      headers: { 'Authorization': `Bearer ${token}` }
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (data.error) {
-          localStorage.removeItem('auth_token');
-          navigate('/');
-        } else {
-          setUser(data);
-          // Fetch queue position if user has a class and group
-          if (data.class && data.group) {
-            fetch(`https://api.questcity.cloud/myhamsteracademia/api/groups/queue/${data.class}`, {
-              headers: { 'Authorization': `Bearer ${token}` }
-            })
-              .then(r => r.json())
-              .then(q => {
-                const found = (q.queue || []).find((item: any) => item.name === data.group);
-                setQueuePosition(found ? found.position : null);
-              })
-              .catch(() => {});
-          }
-        }
-      })
-      .catch(err => console.error(err));
-  }, [navigate, location]);
-
-  // Poll show status
-  useEffect(() => {
-    const fetchStatus = () => {
-      fetch('https://api.questcity.cloud/myhamsteracademia/api/show/status')
-        .then(res => res.json())
-        .then(data => setShowStatus(data))
-        .catch(err => console.error(err));
-    };
-
-    fetchStatus();
-    const interval = setInterval(fetchStatus, 3000);
-    return () => clearInterval(interval);
-  }, []);
-
-  // Timer logic
-  useEffect(() => {
-    let interval: any;
-    if (showStatus?.status === 'timer_running' && showStatus.timerStartedAt) {
-      const start = Number(showStatus.timerStartedAt);
-      const duration = (showStatus.timerDuration || 120) * 1000;
-      
-      const tick = () => {
-        const now = Date.now();
-        const diff = Math.max(0, Math.floor((start + duration - now) / 1000));
-        setTimeLeft(diff);
-      };
-      
-      tick();
-      interval = setInterval(tick, 1000);
-    } else {
-      setTimeLeft(null);
-    }
-    return () => { if (interval) clearInterval(interval); };
-  }, [showStatus]);
-
-  if (!user) return null;
-
-  const avatarUrl = user.avatar
-    ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
-    : `https://cdn.discordapp.com/embed/avatars/${parseInt(user.discriminator || '0') % 5}.png`;
-
-  const classColors: Record<string, string> = {
-    Starway: '#768dde',
-    NSC: '#57c4a0',
-    Staff: '#faa61a',
-  };
-  const classColor = classColors[user.class] || '#8f909c';
-
-  const ordinal = (n: number) => {
-    const s = ['th', 'st', 'nd', 'rd'];
-    const v = n % 100;
-    return n + (s[(v - 20) % 10] || s[v] || s[0]);
-  };
-
-  const bannerStyle: React.CSSProperties = {
-    backgroundColor: 'rgba(39, 42, 48, 0.85)',
-    backdropFilter: 'blur(12px)',
-    border: '1px solid rgba(68, 70, 81, 0.6)',
-    borderRadius: '16px',
-    padding: '14px 20px',
-    boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
-  };
-
   const StockChart = ({ showStatus: ss, timeLeft: tl, currentGroupName: cgn, user, setUser }: { showStatus: any, timeLeft: number | null, currentGroupName: string | null, user: any, setUser: any }) => {
     const initData = () => {
       const data = [500];
@@ -346,6 +232,119 @@ function Main() {
         </div>
       </div>
     );
+  };
+function Main() {
+  const [user, setUser] = useState<any>(null);
+  const [queuePosition, setQueuePosition] = useState<number | null>(null);
+  const [showStatus, setShowStatus] = useState<any>(null);
+  const [timeLeft, setTimeLeft] = useState<number | null>(null);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tokenFromUrl = params.get('token');
+
+    if (tokenFromUrl) {
+      localStorage.setItem('auth_token', tokenFromUrl);
+      navigate('/main', { replace: true });
+    }
+
+    const token = tokenFromUrl || localStorage.getItem('auth_token');
+
+    if (!token) {
+      navigate('/');
+      return;
+    }
+
+    fetch('https://api.questcity.cloud/myhamsteracademia/api/auth/me', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.error) {
+          localStorage.removeItem('auth_token');
+          navigate('/');
+        } else {
+          setUser(data);
+          // Fetch queue position if user has a class and group
+          if (data.class && data.group) {
+            fetch(`https://api.questcity.cloud/myhamsteracademia/api/groups/queue/${data.class}`, {
+              headers: { 'Authorization': `Bearer ${token}` }
+            })
+              .then(r => r.json())
+              .then(q => {
+                const found = (q.queue || []).find((item: any) => item.name === data.group);
+                setQueuePosition(found ? found.position : null);
+              })
+              .catch(() => {});
+          }
+        }
+      })
+      .catch(err => console.error(err));
+  }, [navigate, location]);
+
+  // Poll show status
+  useEffect(() => {
+    const fetchStatus = () => {
+      fetch('https://api.questcity.cloud/myhamsteracademia/api/show/status')
+        .then(res => res.json())
+        .then(data => setShowStatus(data))
+        .catch(err => console.error(err));
+    };
+
+    fetchStatus();
+    const interval = setInterval(fetchStatus, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Timer logic
+  useEffect(() => {
+    let interval: any;
+    if (showStatus?.status === 'timer_running' && showStatus.timerStartedAt) {
+      const start = Number(showStatus.timerStartedAt);
+      const duration = (showStatus.timerDuration || 120) * 1000;
+      
+      const tick = () => {
+        const now = Date.now();
+        const diff = Math.max(0, Math.floor((start + duration - now) / 1000));
+        setTimeLeft(diff);
+      };
+      
+      tick();
+      interval = setInterval(tick, 1000);
+    } else {
+      setTimeLeft(null);
+    }
+    return () => { if (interval) clearInterval(interval); };
+  }, [showStatus]);
+
+  if (!user) return null;
+
+  const avatarUrl = user.avatar
+    ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
+    : `https://cdn.discordapp.com/embed/avatars/${parseInt(user.discriminator || '0') % 5}.png`;
+
+  const classColors: Record<string, string> = {
+    Starway: '#768dde',
+    NSC: '#57c4a0',
+    Staff: '#faa61a',
+  };
+  const classColor = classColors[user.class] || '#8f909c';
+
+  const ordinal = (n: number) => {
+    const s = ['th', 'st', 'nd', 'rd'];
+    const v = n % 100;
+    return n + (s[(v - 20) % 10] || s[v] || s[0]);
+  };
+
+  const bannerStyle: React.CSSProperties = {
+    backgroundColor: 'rgba(39, 42, 48, 0.85)',
+    backdropFilter: 'blur(12px)',
+    border: '1px solid rgba(68, 70, 81, 0.6)',
+    borderRadius: '16px',
+    padding: '14px 20px',
+    boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
   };
 
   return (
