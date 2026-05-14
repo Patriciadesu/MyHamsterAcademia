@@ -369,6 +369,7 @@ function Main() {
           ) : (
             <span style={{ fontSize: '12px', color: '#8f909c' }}>No Class</span>
           )}
+          <span style={{ fontSize: '12px', color: '#faa61a', fontWeight: 700, marginTop: '2px' }}>🪙 {Math.floor(user.coin || 0)}</span>
         </div>
       </div>
 
@@ -642,6 +643,8 @@ function Admin() {
             group: u.group || '',
             discriminator: u.discriminator,
             avatar: u.avatar,
+            coin: u.coin,
+            shares: u.shares,
             img: u.avatar 
               ? `https://cdn.discordapp.com/avatars/${u.discordId}/${u.avatar}.png` 
               : `https://cdn.discordapp.com/embed/avatars/${parseInt(u.discriminator || '0') % 5}.png`
@@ -749,6 +752,7 @@ function Admin() {
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', justifyContent: 'center' }}>
           <span style={{ fontSize: '16px', fontWeight: 700, color: '#e0e2ea', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{u.name}</span>
+          <span style={{ fontSize: '12px', color: '#8f909c' }}>Coins: {Math.floor(u.coin || 0)} | Shares: {u.shares || 0}</span>
         </div>
       </div>
       {/* Role badge */}

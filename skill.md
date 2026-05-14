@@ -289,3 +289,10 @@
 - Included `coin` and `shares` in the `/api/auth/me` user response payload to keep frontend updated.
 - Added 'Buy 1 Share' and 'Sell 1 Share' buttons beneath the Stock Chart that updates user's coin balance and share count.
 - Implemented automatic 'Sell All' trigger when the active show timer expires so users don't lose their invested money before the stock chart refreshes.
+
+## Commit: Show Coins & 1000 Initial Coins
+- Updated User schema to default `coin` to 1000 instead of 0.
+- Ran a MongoDB migration script to update all existing users who had 0 or null coins to 1000 coins.
+- With coins initialized to 1000, the Buy button is now unlocked and fully functional for all users.
+- Displayed user's coin balance inside the top-left User Banner on the Main interface.
+- Displayed Coins and Shares for all users inside the User Management tab of the Admin Panel (within the user drag-and-drop cards).
