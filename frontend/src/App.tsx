@@ -159,10 +159,10 @@ function Main() {
   const StockChart = ({ showStatus: ss, timeLeft: tl, currentGroupName: cgn, user, setUser }: { showStatus: any, timeLeft: number | null, currentGroupName: string | null, user: any, setUser: any }) => {
     const initData = () => {
       const data = [500];
-      for (let i = 1; i < 16; i++) {
+      for (let i = 1; i < 50; i++) {
         const prev = data[i - 1];
-        // Linear goes down initially
-        const change = -(Math.random() * 3 + 1);
+        // Linear goes down initially strictly
+        const change = -0.5;
         data.push(Math.max(10, parseFloat((prev + change).toFixed(2))));
       }
       return data;
@@ -189,7 +189,7 @@ function Main() {
 
     useEffect(() => {
       if (boostAt > lastBoostRef.current && !timerExpired) {
-        boostTicksRef.current = 3; // Rise for exactly 3 ticks (approx 5.4 seconds)
+        boostTicksRef.current = 10; // Rise for exactly 10 ticks (4.0 seconds at 400ms)
         lastBoostRef.current = boostAt;
         setIsBoosted(true);
       }
@@ -203,19 +203,19 @@ function Main() {
           let change: number;
           
           if (boostTicksRef.current > 0) {
-            // Higher spike!
-            change = Math.random() * 20 + 10; // +10 to +30
+            // High smooth spike linearly
+            change = 8.0; 
             boostTicksRef.current -= 1;
             if (boostTicksRef.current === 0) setIsBoosted(false);
           } else {
             // Linear goes down (no bounces)
-            change = -(Math.random() * 3 + 1); // -1 to -4 strictly down
+            change = -0.5; 
           }
           
           const next = Math.max(5, parseFloat((last + change).toFixed(2)));
           return [...prev.slice(1), next];
         });
-      }, 1800);
+      }, 400); // Super smooth 400ms tick rate
       return () => clearInterval(interval);
     }, [timerExpired]);
 
@@ -258,29 +258,30 @@ function Main() {
     const maxP = Math.max(...priceData);
     const minP = Math.min(...priceData);
     const range = maxP - minP || 1;
-    const points = priceData.map((d, i) => `${i * 24},${90 - ((d - minP) / range) * 80}`).join(' ');
+    const xStep = 600 / (priceData.length - 1);
+    const points = priceData.map((d, i) => `${i * xStep},${160 - ((d - minP) / range) * 140}`).join(' ');
 
     return (
       <div style={{ 
-        padding: '24px', backgroundColor: 'rgba(30, 33, 38, 0.6)', borderRadius: '24px', 
-        border: `1px solid ${isBoosted ? 'rgba(87, 196, 160, 0.2)' : 'rgba(255,255,255,0.08)'}`, backdropFilter: 'blur(16px)', 
-        width: '420px', boxShadow: isBoosted ? '0 20px 50px rgba(87, 196, 160, 0.15)' : '0 20px 50px rgba(0,0,0,0.3)',
+        padding: '32px', backgroundColor: 'rgba(30, 33, 38, 0.6)', borderRadius: '32px', 
+        border: `1px solid ${isBoosted ? 'rgba(87, 196, 160, 0.2)' : 'rgba(255,255,255,0.08)'}`, backdropFilter: 'blur(20px)', 
+        width: '660px', boxShadow: isBoosted ? '0 20px 50px rgba(87, 196, 160, 0.15)' : '0 20px 50px rgba(0,0,0,0.3)',
         animation: 'fadeIn 0.5s ease-out', transition: 'all 0.5s ease'
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            <span style={{ fontSize: '12px', color: '#8f909c', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>Hamster Index</span>
-            <span style={{ fontSize: '28px', fontWeight: 900, color: '#e0e2ea', display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+            <span style={{ fontSize: '14px', color: '#8f909c', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>Hamster Index</span>
+            <span style={{ fontSize: '36px', fontWeight: 900, color: '#e0e2ea', display: 'flex', alignItems: 'baseline', gap: '12px' }}>
               ${currentPrice.toFixed(2)}
-              <span style={{ fontSize: '14px', color: accentColor, fontWeight: 700, transition: 'color 0.3s' }}>{isUp ? '+' : ''}{pctChange}%</span>
+              <span style={{ fontSize: '16px', color: accentColor, fontWeight: 700, transition: 'color 0.3s' }}>{isUp ? '+' : ''}{pctChange}%</span>
             </span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: `${accentColor}18`, padding: '6px 12px', borderRadius: '8px', transition: 'all 0.3s' }}>
-            <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: accentColor, animation: 'pulse 1.5s infinite', transition: 'background-color 0.3s' }} />
-            <span style={{ color: accentColor, fontSize: '11px', fontWeight: 800, transition: 'color 0.3s' }}>{isBoosted ? '📈 RISING' : 'LIVE'}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: `${accentColor}18`, padding: '8px 16px', borderRadius: '12px', transition: 'all 0.3s' }}>
+            <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: accentColor, animation: 'pulse 1.5s infinite', transition: 'background-color 0.3s' }} />
+            <span style={{ color: accentColor, fontSize: '13px', fontWeight: 800, transition: 'color 0.3s' }}>{isBoosted ? '📈 RISING' : 'LIVE'}</span>
           </div>
         </div>
-        <svg viewBox="0 0 360 100" style={{ width: '100%', height: '140px', overflow: 'visible' }}>
+        <svg viewBox="0 0 600 180" style={{ width: '100%', height: '220px', overflow: 'visible' }}>
           <defs>
             <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor={accentColor} stopOpacity="0.35" />
@@ -290,17 +291,17 @@ function Main() {
           <polyline
             fill="url(#chartGradient)"
             stroke="none"
-            points={`0,100 ${points} 360,100`}
-            style={{ transition: 'all 0.5s ease' }}
+            points={`0,180 ${points} 600,180`}
+            style={{ transition: 'all 0.4s linear' }}
           />
           <polyline
             fill="none"
             stroke={accentColor}
-            strokeWidth="3"
+            strokeWidth="4"
             strokeLinecap="round"
             strokeLinejoin="round"
             points={points}
-            style={{ filter: `drop-shadow(0 0 12px ${accentColor}99)`, transition: 'all 0.5s ease' }}
+            style={{ filter: `drop-shadow(0 0 16px ${accentColor}99)`, transition: 'all 0.4s linear' }}
           />
         </svg>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '16px' }}>

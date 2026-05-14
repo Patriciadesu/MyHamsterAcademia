@@ -296,3 +296,10 @@
 - With coins initialized to 1000, the Buy button is now unlocked and fully functional for all users.
 - Displayed user's coin balance inside the top-left User Banner on the Main interface.
 - Displayed Coins and Shares for all users inside the User Management tab of the Admin Panel (within the user drag-and-drop cards).
+## Commit: Remake Stock Graph UI & Logic
+- Redesigned the stock graph UI to be significantly larger and easier to read.
+- Changed SVG rendering dimensions to 600x180 and increased the array to hold 50 points of history.
+- Reduced the interval tick rate from 1800ms down to a super smooth 400ms.
+- Changed the "natural" downward trend to strictly decrease by a fixed amount without randomness.
+- Changed the "Boost" upward trend to strictly rise by a fixed amount without randomness.
+- A Boost now lasts for exactly 10 fast ticks (~4 seconds) ensuring a massive and continuous, predictable visual spike.
