@@ -161,9 +161,8 @@ function Main() {
       const data = [500];
       for (let i = 1; i < 16; i++) {
         const prev = data[i - 1];
-        const change = Math.random() < 0.75
-          ? -(Math.random() * 6 + 2)
-          : (Math.random() * 3 + 1);
+        // Linear goes down initially
+        const change = -(Math.random() * 3 + 1);
         data.push(Math.max(10, parseFloat((prev + change).toFixed(2))));
       }
       return data;
