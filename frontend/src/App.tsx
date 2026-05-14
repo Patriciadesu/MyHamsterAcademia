@@ -47,8 +47,8 @@ function Login() {
       const data = [500];
       for (let i = 1; i < 50; i++) {
         const prev = data[i - 1];
-        // Linear goes down initially strictly
-        const change = -0.5;
+        // Linear goes down exactly 1 per second (-0.4 per 400ms tick)
+        const change = -0.4;
         data.push(Math.max(10, parseFloat((prev + change).toFixed(2))));
       }
       return data;
@@ -94,8 +94,8 @@ function Login() {
             boostTicksRef.current -= 1;
             if (boostTicksRef.current === 0) setIsBoosted(false);
           } else {
-            // Linear goes down (no bounces)
-            change = -0.5; 
+            // Linear goes down exactly 1 per second (-0.4 per 400ms tick)
+            change = -0.4; 
           }
           
           const next = Math.max(5, parseFloat((last + change).toFixed(2)));
