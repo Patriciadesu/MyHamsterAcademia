@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from 'react-router-dom'
 
 function Login() {
@@ -179,26 +179,21 @@ function Main() {
       }
     }, [cgn]);
 
-    // Check if stock is currently boosted (within last 10 seconds)
+    // Stop updating when timer runs out (timeLeft === 0)
+    const timerExpired = tl !== null && tl <= 0;
+
     const boostAt = ss?.stockBoostAt ? Number(ss.stockBoostAt) : 0;
+    const lastBoostRef = useRef(0);
+    const boostTicksRef = useRef(0);
     const [isBoosted, setIsBoosted] = useState(false);
 
     useEffect(() => {
-      const checkBoost = () => {
-        if (boostAt > 0) {
-          const elapsed = Date.now() - boostAt;
-          setIsBoosted(elapsed < 3000);
-        } else {
-          setIsBoosted(false);
-        }
-      };
-      checkBoost();
-      const iv = setInterval(checkBoost, 500);
-      return () => clearInterval(iv);
-    }, [boostAt]);
-
-    // Stop updating when timer runs out (timeLeft === 0)
-    const timerExpired = tl !== null && tl <= 0;
+      if (boostAt > lastBoostRef.current && !timerExpired) {
+        boostTicksRef.current = 3; // Rise for exactly 3 ticks (approx 5.4 seconds)
+        lastBoostRef.current = boostAt;
+        setIsBoosted(true);
+      }
+    }, [boostAt, timerExpired]);
 
     useEffect(() => {
       if (timerExpired) return; // Don't start interval if timer expired
@@ -206,19 +201,23 @@ function Main() {
         setPriceData(prev => {
           const last = prev[prev.length - 1];
           let change: number;
-          if (isBoosted) {
+          
+          if (boostTicksRef.current > 0) {
             // Higher spike!
             change = Math.random() * 20 + 10; // +10 to +30
+            boostTicksRef.current -= 1;
+            if (boostTicksRef.current === 0) setIsBoosted(false);
           } else {
             // Linear goes down (no bounces)
             change = -(Math.random() * 3 + 1); // -1 to -4 strictly down
           }
+          
           const next = Math.max(5, parseFloat((last + change).toFixed(2)));
           return [...prev.slice(1), next];
         });
       }, 1800);
       return () => clearInterval(interval);
-    }, [isBoosted, timerExpired]);
+    }, [timerExpired]);
 
     const currentPrice = priceData[priceData.length - 1];
     const pctChange = (((currentPrice - 500) / 500) * 100).toFixed(2);
