@@ -156,9 +156,8 @@ function Main() {
     boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
   };
 
-  const StockChart = ({ showStatus: ss }: { showStatus: any }) => {
-    // Start from 500, generate initial decreasing data with some bounces
-    const [priceData, setPriceData] = useState(() => {
+  const StockChart = ({ showStatus: ss, timeLeft: tl, currentGroupName: cgn, user, setUser }: { showStatus: any, timeLeft: number | null, currentGroupName: string | null, user: any, setUser: any }) => {
+    const initData = () => {
       const data = [500];
       for (let i = 1; i < 16; i++) {
         const prev = data[i - 1];
@@ -168,7 +167,18 @@ function Main() {
         data.push(Math.max(10, parseFloat((prev + change).toFixed(2))));
       }
       return data;
-    });
+    };
+    const [priceData, setPriceData] = useState(initData);
+    const [prevGroup, setPrevGroup] = useState(cgn);
+    const [trading, setTrading] = useState(false);
+
+    // Reset chart when group changes
+    useEffect(() => {
+      if (cgn !== prevGroup) {
+        setPriceData(initData());
+        setPrevGroup(cgn);
+      }
+    }, [cgn]);
 
     // Check if stock is currently boosted (within last 10 seconds)
     const boostAt = ss?.stockBoostAt ? Number(ss.stockBoostAt) : 0;
@@ -178,7 +188,7 @@ function Main() {
       const checkBoost = () => {
         if (boostAt > 0) {
           const elapsed = Date.now() - boostAt;
-          setIsBoosted(elapsed < 10000); // 10 seconds of boost
+          setIsBoosted(elapsed < 3000);
         } else {
           setIsBoosted(false);
         }
@@ -188,33 +198,63 @@ function Main() {
       return () => clearInterval(iv);
     }, [boostAt]);
 
+    // Stop updating when timer runs out (timeLeft === 0)
+    const timerExpired = tl !== null && tl <= 0;
+
     useEffect(() => {
+      if (timerExpired) return; // Don't start interval if timer expired
       const interval = setInterval(() => {
         setPriceData(prev => {
           const last = prev[prev.length - 1];
           let change: number;
           if (isBoosted) {
-            // Boosted: strong upward movement
-            change = Math.random() < 0.85
-              ? (Math.random() * 12 + 4)    // 85% chance: rise 4–16
-              : -(Math.random() * 2 + 0.5); // 15% chance: tiny dip
+            // Higher spike!
+            change = Math.random() * 20 + 10; // +10 to +30
           } else {
-            // Normal: bearish trend
-            change = Math.random() < 0.7
-              ? -(Math.random() * 8 + 1.5)
-              : (Math.random() * 4 + 0.5);
+            // Linear goes down (no bounces)
+            change = -(Math.random() * 3 + 1); // -1 to -4 strictly down
           }
           const next = Math.max(5, parseFloat((last + change).toFixed(2)));
           return [...prev.slice(1), next];
         });
       }, 1800);
       return () => clearInterval(interval);
-    }, [isBoosted]);
+    }, [isBoosted, timerExpired]);
 
     const currentPrice = priceData[priceData.length - 1];
     const pctChange = (((currentPrice - 500) / 500) * 100).toFixed(2);
     const isUp = Number(pctChange) >= 0;
     const accentColor = isBoosted || isUp ? '#57c4a0' : '#ed4245';
+
+    const handleTrade = async (action: 'buy' | 'sell' | 'sell_all') => {
+      if (trading) return;
+      setTrading(true);
+      try {
+        const token = localStorage.getItem('auth_token');
+        const res = await fetch('https://api.questcity.cloud/myhamsteracademia/api/show/trade', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ action, price: currentPrice })
+        });
+        const data = await res.json();
+        if (data.success) {
+          setUser((u: any) => ({ ...u, coin: data.coin, shares: data.shares }));
+        } else {
+          console.error(data.error);
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setTrading(false);
+      }
+    };
+
+    // Auto sell-all when timer expires
+    useEffect(() => {
+      if (timerExpired && (user.shares || 0) > 0) {
+        handleTrade('sell_all');
+      }
+    }, [timerExpired, user.shares]);
 
     // Map price data to SVG Y coords
     const maxP = Math.max(...priceData);
@@ -270,6 +310,40 @@ function Main() {
           <span style={{ fontSize: '10px', color: '#444651', fontWeight: 600 }}>12:00</span>
           <span style={{ fontSize: '10px', color: '#444651', fontWeight: 600 }}>15:00</span>
           <span style={{ fontSize: '10px', color: '#444651', fontWeight: 600 }}>18:00</span>
+        </div>
+
+        {/* Trade Controls */}
+        <div style={{ marginTop: '24px', paddingTop: '16px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px', fontSize: '12px', fontWeight: 700, color: '#8f909c' }}>
+            <span>YOUR COINS: <span style={{ color: '#e0e2ea' }}>{Math.floor(user?.coin || 0)}</span></span>
+            <span>SHARES: <span style={{ color: '#e0e2ea' }}>{user?.shares || 0}</span></span>
+          </div>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button 
+              onClick={() => handleTrade('buy')}
+              disabled={trading || timerExpired || (user?.coin || 0) < currentPrice}
+              style={{
+                flex: 1, padding: '12px', borderRadius: '12px', border: 'none',
+                backgroundColor: 'rgba(87, 196, 160, 0.15)', color: '#57c4a0',
+                fontSize: '14px', fontWeight: 800, cursor: (trading || timerExpired || (user?.coin || 0) < currentPrice) ? 'not-allowed' : 'pointer',
+                opacity: (trading || timerExpired || (user?.coin || 0) < currentPrice) ? 0.5 : 1, transition: 'all 0.2s'
+              }}
+            >
+              BUY 1 SHARE
+            </button>
+            <button 
+              onClick={() => handleTrade('sell')}
+              disabled={trading || timerExpired || (user?.shares || 0) <= 0}
+              style={{
+                flex: 1, padding: '12px', borderRadius: '12px', border: 'none',
+                backgroundColor: 'rgba(237, 66, 69, 0.15)', color: '#ed4245',
+                fontSize: '14px', fontWeight: 800, cursor: (trading || timerExpired || (user?.shares || 0) <= 0) ? 'not-allowed' : 'pointer',
+                opacity: (trading || timerExpired || (user?.shares || 0) <= 0) ? 0.5 : 1, transition: 'all 0.2s'
+              }}
+            >
+              SELL 1 SHARE
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -421,7 +495,7 @@ function Main() {
                  <h2 style={{ fontSize: '32px', fontWeight: 900, color: '#e0e2ea', margin: '16px 0 8px 0' }}>Group {showStatus.currentGroupName} is Live</h2>
                  <p style={{ margin: 0, color: '#8f909c', fontSize: '16px' }}>Please wait for your turn. Analyzing market trends...</p>
                </div>
-               <StockChart showStatus={showStatus} />
+               <StockChart showStatus={showStatus} timeLeft={timeLeft} currentGroupName={showStatus.currentGroupName} user={user} setUser={setUser} />
             </div>
           )
         )}
@@ -630,6 +704,36 @@ function Admin() {
     e.preventDefault();
   };
 
+  const handleRoleChange = async (userId: string, currentRole: string) => {
+    if (currentRole === 'admin') return;
+    const newRole = currentRole === 'judge' ? 'user' : 'judge';
+    
+    // Optimistic UI update
+    setUsers(prev => prev.map(u => u._id === userId ? { ...u, role: newRole } : u));
+
+    const token = localStorage.getItem('auth_token');
+    try {
+      const res = await fetch(`https://api.questcity.cloud/myhamsteracademia/api/users/${userId}/role`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ role: newRole })
+      });
+      if (!res.ok) {
+        // Revert on failure
+        setUsers(prev => prev.map(u => u._id === userId ? { ...u, role: currentRole } : u));
+      }
+    } catch (err) {
+      console.error('Failed to update role:', err);
+      setUsers(prev => prev.map(u => u._id === userId ? { ...u, role: currentRole } : u));
+    }
+  };
+
+  const roleColors: Record<string, { bg: string; text: string }> = {
+    admin: { bg: 'rgba(250, 166, 26, 0.15)', text: '#faa61a' },
+    judge: { bg: 'rgba(237, 66, 69, 0.15)', text: '#ed4245' },
+    user: { bg: 'rgba(143, 144, 156, 0.15)', text: '#8f909c' },
+  };
+
   const renderUserCard = (u: any, i: number) => (
     <div 
       key={i} 
@@ -647,6 +751,23 @@ function Admin() {
           <span style={{ fontSize: '16px', fontWeight: 700, color: '#e0e2ea', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{u.name}</span>
         </div>
       </div>
+      {/* Role badge */}
+      <button
+        onClick={(e) => { e.stopPropagation(); handleRoleChange(u._id, u.role); }}
+        disabled={u.role === 'admin'}
+        style={{
+          padding: '4px 12px', borderRadius: '20px', border: 'none',
+          backgroundColor: (roleColors[u.role] || roleColors.user).bg,
+          color: (roleColors[u.role] || roleColors.user).text,
+          fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px',
+          cursor: u.role === 'admin' ? 'default' : 'pointer',
+          transition: 'all 0.15s', pointerEvents: 'auto',
+          opacity: u.role === 'admin' ? 0.6 : 1,
+        }}
+        title={u.role === 'admin' ? 'Cannot change admin role' : `Click to toggle role (current: ${u.role})`}
+      >
+        {u.role === 'admin' ? '🔒 Admin' : u.role === 'judge' ? '⚖️ Judge' : '👤 User'}
+      </button>
     </div>
   );
 

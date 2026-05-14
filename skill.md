@@ -280,3 +280,12 @@
 - Added a large red circular BOOST button (📈) at the bottom-center of the Main page, visible only to judges and admins when a timer is running.
 - Button immediately refreshes show status after clicking so the chart reacts instantly.
 - Built frontend and restarted backend.
+
+## Commit: Update Stock Chart Pattern & Trading Features
+- Changed Stock Chart default pattern to go strictly downwards instead of bouncing.
+- Made the Judge Boost button spike the price much higher (+10 to +30 points) for a shorter duration (3 seconds).
+- Added `shares` field to the User schema to track investments.
+- Created `POST /api/show/trade` backend endpoint to handle buy, sell, and sell_all requests.
+- Included `coin` and `shares` in the `/api/auth/me` user response payload to keep frontend updated.
+- Added 'Buy 1 Share' and 'Sell 1 Share' buttons beneath the Stock Chart that updates user's coin balance and share count.
+- Implemented automatic 'Sell All' trigger when the active show timer expires so users don't lose their invested money before the stock chart refreshes.

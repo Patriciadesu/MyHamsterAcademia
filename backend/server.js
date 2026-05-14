@@ -157,7 +157,9 @@ app.get('/api/auth/me', async (req, res) => {
       email: user.email,
       role: user.role,
       class: user.class,
-      group: user.group
+      group: user.group,
+      coin: user.coin || 0,
+      shares: user.shares || 0
     });
   } catch (err) {
     res.status(401).json({ error: 'Invalid token' });
@@ -218,6 +220,31 @@ app.put('/api/users/:id/class', requireAdmin, async (req, res) => {
     res.json({ success: true, user });
   } catch (err) {
     res.status(500).json({ error: 'Failed to update class' });
+  }
+});
+
+// Update user role (Admin only, cannot change admin roles)
+app.put('/api/users/:id/role', requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { role: newRole } = req.body;
+
+    if (!['user', 'judge'].includes(newRole)) {
+      return res.status(400).json({ error: 'Invalid role. Allowed: user, judge' });
+    }
+
+    const user = await User.findById(id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    if (user.role === 'admin') {
+      return res.status(403).json({ error: 'Cannot change admin role' });
+    }
+
+    user.role = newRole;
+    await user.save();
+    res.json({ success: true, user });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update role' });
   }
 });
 
@@ -395,6 +422,48 @@ app.post('/api/show/force-trigger-timer', requireAdmin, async (req, res) => {
   }
 });
 
+// Trade stock (buy, sell, sell_all)
+app.post('/api/show/trade', async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) return res.status(401).json({ error: 'Unauthorized' });
+
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const user = await User.findOne({ discordId: decoded.id });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    const { action, price } = req.body;
+    if (!['buy', 'sell', 'sell_all'].includes(action) || typeof price !== 'number') {
+      return res.status(400).json({ error: 'Invalid trade payload' });
+    }
+
+    if (action === 'buy') {
+      if (user.coin < price) {
+        return res.status(400).json({ error: 'Not enough coins' });
+      }
+      user.coin -= price;
+      user.shares = (user.shares || 0) + 1;
+    } else if (action === 'sell') {
+      if ((user.shares || 0) <= 0) {
+        return res.status(400).json({ error: 'No shares to sell' });
+      }
+      user.coin += price;
+      user.shares -= 1;
+    } else if (action === 'sell_all') {
+      const shares = user.shares || 0;
+      if (shares > 0) {
+        user.coin += price * shares;
+        user.shares = 0;
+      }
+    }
+
+    await user.save();
+    res.json({ success: true, coin: user.coin, shares: user.shares });
+  } catch (err) {
+    res.status(500).json({ error: 'Trade failed' });
+  }
+});
+
 // Boost stock (Judge only)
 app.post('/api/show/boost-stock', async (req, res) => {
   try {
@@ -436,6 +505,7 @@ app.post('/api/show/next', requireAdmin, async (req, res) => {
     state.currentGroupIndex += 1;
     state.status = 'waiting_for_group';
     state.timerStartedAt = null;
+    state.stockBoostAt = null;
     await state.save();
 
     res.json({ success: true, state });
